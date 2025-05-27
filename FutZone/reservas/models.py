@@ -1,3 +1,8 @@
 from django.db import models
 
-# Create your models here.
+# class Appointment( models.Model):
+#      appointment_date= models.DateField()
+#      appointment_start=models.DateTimeField()
+#      appointment_end= models.DateTimeField()
+
+     
