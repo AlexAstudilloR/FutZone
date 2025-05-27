@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      #Nuestras apps 
      'reservas',
-     'horario',
+     'horarios',
      #Librerias instaladas
      'rest_framework'
 ]
