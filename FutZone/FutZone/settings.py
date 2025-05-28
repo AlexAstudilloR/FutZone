@@ -22,6 +22,7 @@ INSTALLED_APPS = [
      'reservas',
      'horario',
      'cancha',
+     'profiles',
      #Librerias instaladas
      'rest_framework'
 ]
