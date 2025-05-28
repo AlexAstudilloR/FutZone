@@ -1,13 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-
-class Cancha(models.Model):
-    dimensiones = models.CharField(max_length=20)
-    tarifa = models.DecimalField(max_digits=6, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.dimensiones} - ${self.tarifa}"
-
+from cancha.models import SoccerField
 
 class HorarioDisponible(models.Model):
     DIAS_SEMANA = [
@@ -25,7 +18,7 @@ class HorarioDisponible(models.Model):
     horaFin = models.TimeField()
     disponible = models.BooleanField(default=True)
     motivo_bloqueo = models.TextField(blank=True, null=True)  #Agregado recientemente
-    cancha = models.ForeignKey(Cancha, on_delete=models.CASCADE, related_name="horarios")
+    cancha = models.ForeignKey(SoccerField, on_delete=models.CASCADE, related_name="horarios")
 
     def __str__(self):
         estado = "Disponible" if self.disponible else "No Disponible"
