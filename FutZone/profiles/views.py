@@ -62,7 +62,6 @@ class RegisterView(APIView):
 
         user_id = user["id"]
 
-        # Crear perfil en tabla `profiles`
         try:
             ProfileModel.objects.create(
                 id=user_id,
