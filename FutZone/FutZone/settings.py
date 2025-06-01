@@ -7,7 +7,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%n!)s(pm^e-udpj9&2ti*1_!)8gtap2dp8&!th36@nefc6ukub'
 DEBUG = True
-
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 ALLOWED_HOSTS = []
 
 
@@ -56,8 +57,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'FutZone.wsgi.application'
 
-
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'profiles.authentication.SupabaseRemoteAuth',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
 
 DATABASES = {
     'default': {
