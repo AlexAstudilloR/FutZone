@@ -1,14 +1,10 @@
 from rest_framework import viewsets
-from .models import Cancha, HorarioDisponible
-from .serializers import CanchaSerializer, HorarioDisponibleSerializer
+from .models import  HorarioDisponible
+from .serializers import  HorarioDisponibleSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-
-class CanchaViewSet(viewsets.ModelViewSet):
-    queryset = Cancha.objects.all()
-    serializer_class = CanchaSerializer
 
 class HorarioDisponibleViewSet(viewsets.ModelViewSet):
     queryset = HorarioDisponible.objects.all()

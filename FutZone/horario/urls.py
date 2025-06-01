@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CanchaViewSet, HorarioDisponibleViewSet, HorariosFiltradosAPIView
+from .views import  HorarioDisponibleViewSet, HorariosFiltradosAPIView
 
 router = DefaultRouter()
-router.register(r'canchas', CanchaViewSet)
+
 router.register(r'horarios', HorarioDisponibleViewSet)
 
 urlpatterns = [
