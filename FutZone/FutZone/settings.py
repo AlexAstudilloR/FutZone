@@ -7,8 +7,15 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%n!)s(pm^e-udpj9&2ti*1_!)8gtap2dp8&!th36@nefc6ukub'
 DEBUG = True
+
+#Información que se supone que debe de ser confidencial 
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+PEIGO_QR_URL = "https://upload.wikimedia.org/wikipedia/commons/5/5e/QR_Code_example.png"
+
 ALLOWED_HOSTS = []
 
 
@@ -20,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
      #Nuestras apps 
-     'reservas',
+     'reservas.apps.ReservasConfig',
      'horario',
      'cancha',
      'profiles',
@@ -107,7 +114,10 @@ USE_TZ = True
 
 
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')  # Carpeta donde tú pones tus archivos estáticos
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Solo se usa en producción
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
