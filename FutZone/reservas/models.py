@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-#from profiles.models import ProfileModel   ACTIVAR NUEVAMENTE
+from profiles.models import ProfileModel   #ACTIVAR NUEVAMENTE
 from django.contrib.auth.models import User  # modelo de Django por defecto
 from cancha.models import SoccerField  
 
@@ -12,8 +12,8 @@ class Appointment(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    #user = models.ForeignKey(ProfileModel, on_delete=models.CASCADE, related_name='appointments')    ACTIVAR CUANDO SE TRABAJE CON SUPABASE
-    user = models.ForeignKey(User, on_delete=models.CASCADE)   #Cuando se use supabase esta linea se debe borrar.
+    user = models.ForeignKey(ProfileModel, on_delete=models.CASCADE, related_name='appointments')    #ACTIVAR CUANDO SE TRABAJE CON SUPABASE
+     #Cuando se use supabase esta linea se debe borrar.
     field = models.ForeignKey(SoccerField, on_delete=models.CASCADE, related_name='appointments')
     date = models.DateField()
 

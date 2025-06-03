@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 from .models import  HorarioDisponible
 from .serializers import  HorarioDisponibleSerializer
 from rest_framework.views import APIView
@@ -7,6 +8,7 @@ from rest_framework import status
 
 
 class HorarioDisponibleViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     queryset = HorarioDisponible.objects.all()
     serializer_class = HorarioDisponibleSerializer
 

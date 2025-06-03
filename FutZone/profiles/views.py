@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from .models import ProfileModel
 from .serializer import ProfileSerializer
 from rest_framework.views import APIView
@@ -33,6 +34,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         serializer.save(id=self.request.user.id)
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
