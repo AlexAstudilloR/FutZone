@@ -1,12 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import  HorarioDisponibleViewSet, HorariosFiltradosAPIView
+from .views import HorarioFlexibleViewSet
 
 router = DefaultRouter()
-
-router.register(r'horarios', HorarioDisponibleViewSet)
+router.register(r'horarios', HorarioFlexibleViewSet, basename='horarios')
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('filtrados/', HorariosFiltradosAPIView.as_view(), name='horarios-filtrados'),
+    path('', include(router.urls))
 ]

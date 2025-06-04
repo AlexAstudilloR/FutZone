@@ -1,32 +1,43 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from cancha.models import SoccerField
 
-class HorarioDisponible(models.Model):
-    DIAS_SEMANA = [
-        ('Lunes', 'Lunes'),
-        ('Martes', 'Martes'),
-        ('Miércoles', 'Miércoles'),
-        ('Jueves', 'Jueves'),
-        ('Viernes', 'Viernes'),
-        ('Sábado', 'Sábado'),
-        ('Domingo', 'Domingo'),
+class HorarioFlexible(models.Model):
+    TIPO_HORARIO = [
+        ('recurrente', 'Recurrente semanal'),
+        ('excepcion', 'Excepción por fecha'),
     ]
 
-    diaSemana = models.CharField(max_length=20, choices=DIAS_SEMANA)
-    horaInicio = models.TimeField()
-    horaFin = models.TimeField()
+    tipo = models.CharField(max_length=20, choices=TIPO_HORARIO, default='recurrente')
+
+    diaSemana = models.CharField(
+        max_length=20,
+        choices=[
+            ('Lunes', 'Lunes'),
+            ('Martes', 'Martes'),
+            ('Miércoles', 'Miércoles'),
+            ('Jueves', 'Jueves'),
+            ('Viernes', 'Viernes'),
+            ('Sábado', 'Sábado'),
+            ('Domingo', 'Domingo'),
+        ],
+        blank=True, null=True
+    )
+
+    fecha = models.DateField(blank=True, null=True)
+
+    horaInicio = models.TimeField(blank=True, null=True)
+    horaFin = models.TimeField(blank=True, null=True)
+
     disponible = models.BooleanField(default=True)
-    motivo_bloqueo = models.TextField(blank=True, null=True)  #Agregado recientemente
-    cancha = models.ForeignKey(SoccerField, on_delete=models.CASCADE, related_name="horarios")
+    motivo_bloqueo = models.TextField(blank=True, null=True)
+
+    cancha = models.ForeignKey(
+        SoccerField,
+        on_delete=models.CASCADE,
+        related_name="horarios_flexibles"
+    )
 
     def __str__(self):
+        detalle = self.diaSemana if self.tipo == 'recurrente' else str(self.fecha)
         estado = "Disponible" if self.disponible else "No Disponible"
-        return f"{self.cancha} - {self.diaSemana} de {self.horaInicio} a {self.horaFin} ({estado})"
-
-    def clean(self):
-        if self.horaInicio >= self.horaFin:
-            raise ValidationError("La hora de inicio debe ser anterior a la hora fin.")
-            
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        return f"{self.cancha} - {detalle} ({self.horaInicio} a {self.horaFin}) [{estado}]"
