@@ -2,13 +2,18 @@ from django.core.exceptions import ValidationError
 from cancha.models import SoccerField
 from horario.models import HorarioFlexible
 from django.db.models import Q
+from datetime import date 
 
 class AppointmentValidator:
     dias_es = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-
+    
     @staticmethod
     def validate(instance):
         required_fields = ['date', 'time_start', 'time_end', 'field']
+        
+        if instance.date < date.today():
+             raise ValidationError("No se puede reservar en una fecha pasada.")
+         
         if any(getattr(instance, field, None) is None for field in required_fields):
             return
 
