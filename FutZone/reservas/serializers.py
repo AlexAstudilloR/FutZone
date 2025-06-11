@@ -7,22 +7,25 @@ class AppointmentSerializer(serializers.ModelSerializer):
     valor_pagar = serializers.DecimalField(
         max_digits=6, decimal_places=2, read_only=True
     )
+    user_name = serializers.SerializerMethodField()
+    field_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
         fields = '__all__'
 
+    def get_user_name(self, obj):
+        return f"{obj.user.full_name}".strip()
+
+    def get_field_name(self, obj):
+        return obj.field.name
+
     def validate(self, data):
-        # Crear instancia temporal para validar
         instance = self.instance or Appointment(**data)
-
-        # Aplicar lógica de validación (traslapes, horarios, etc.)
         AppointmentValidator.validate(instance)
-
         return data
 
     def create(self, validated_data):
-        # Calcular valor_pagar directamente aquí
         time_start = validated_data.get("time_start")
         time_end = validated_data.get("time_end")
         field = validated_data.get("field")
@@ -37,7 +40,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        # Recalcular si se cambian los campos clave
         time_start = validated_data.get("time_start", instance.time_start)
         time_end = validated_data.get("time_end", instance.time_end)
         field = validated_data.get("field", instance.field)

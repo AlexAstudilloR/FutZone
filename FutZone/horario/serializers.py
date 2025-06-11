@@ -1,66 +1,72 @@
 from rest_framework import serializers
-from .models import HorarioFlexible
+from .models import WeeklySchedule, DateException
 
-class HorarioFlexibleSerializer(serializers.ModelSerializer):
-    cancha_info = serializers.StringRelatedField(source='cancha', read_only=True)
-
+class WeeklyScheduleSerializer(serializers.ModelSerializer):
+    dia_display = serializers.CharField(source='get_dia_display', read_only=True)
     class Meta:
-        model = HorarioFlexible
-        fields = '__all__'
+        model = WeeklySchedule
+        fields = "__all__"
+        read_only_fields = ["id", "dia_display"]
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if data['disponible']:
-            data.pop('motivo_bloqueo', None)
-            data.pop('fecha', None)
-        return data
+    def validate(self, attrs):
+        cancha = attrs.get("cancha") or self.instance.cancha
+        dia = attrs.get("dia") or self.instance.dia
+        ap = attrs.get("hora_apertura")
+        ci = attrs.get("hora_cierre")
 
-    def validate(self, data):
-        instance_data = {**data}
-        if self.instance:
-            for field in self.fields:
-                if field not in instance_data:
-                    instance_data[field] = getattr(self.instance, field, None)
+        # 1. Apertura < cierre
+        if ap and ci and ap >= ci:
+            raise serializers.ValidationError("La hora de apertura debe ser anterior a la de cierre.")
 
-        tipo = instance_data.get('tipo', 'recurrente')
-        dia = instance_data.get('diaSemana')
-        fecha = instance_data.get('fecha')
-        hora_inicio = instance_data.get('horaInicio')
-        hora_fin = instance_data.get('horaFin')
-        cancha = instance_data.get('cancha')
-        disponible = instance_data.get('disponible', True)
-        motivo_bloqueo = instance_data.get('motivo_bloqueo', '')
-
-        # 1. Validar horas
-        if hora_inicio and hora_fin and hora_inicio >= hora_fin:
-            raise serializers.ValidationError("La hora de inicio debe ser menor a la hora de fin.")
-
-        # 2. Validar campos requeridos por tipo
-        if tipo == 'recurrente' and not dia:
-            raise serializers.ValidationError("Debe especificar el día de la semana para un horario recurrente.")
-        if tipo == 'excepcion' and not fecha:
-            raise serializers.ValidationError("Debe especificar la fecha para una excepción.")
-
-        # 3. Validar traslape si es disponible
-        qs = HorarioFlexible.objects.filter(
-            cancha=cancha,
-            tipo=tipo,
-            diaSemana=dia if tipo == 'recurrente' else None,
-            fecha=fecha if tipo == 'excepcion' else None,
-        )
+        # 2. Traslape
+        qs = WeeklySchedule.objects.filter(cancha=cancha, dia=dia)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
 
-        if hora_inicio and hora_fin and disponible:
-            traslape = qs.filter(
-                horaInicio__lt=hora_fin,
-                horaFin__gt=hora_inicio
-            ).exists()
-            if traslape:
-                raise serializers.ValidationError("El horario se traslapa con uno ya existente.")
+        if ap and ci and qs.filter(
+            hora_apertura__lt=ci,
+            hora_cierre__gt=ap
+        ).exists():
+            raise serializers.ValidationError("Este rango de horario se traslapa con otro existente para ese día.")
 
-        # 4. Validar motivo si está bloqueado
-        if not disponible and not motivo_bloqueo:
-            raise serializers.ValidationError("Debe especificar un motivo si el horario está bloqueado.")
+        return attrs
 
-        return data
+
+class DateExceptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DateException
+        fields = "__all__"
+        read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        cancha = attrs.get("cancha") or self.instance.cancha
+        fecha = attrs.get("fecha") or self.instance.fecha
+        ap = attrs.get("hora_apertura")
+        ci = attrs.get("hora_cierre")
+        cerrado = attrs.get("cerrado", getattr(self.instance, "cerrado", True))
+        motivo = attrs.get("motivo", getattr(self.instance, "motivo", ""))
+
+        # 1. Si no está cerrado, apertura < cierre
+        if not cerrado:
+            if not ap or not ci:
+                raise serializers.ValidationError("Debe especificar apertura y cierre si no está cerrado.")
+            if ap >= ci:
+                raise serializers.ValidationError("La hora de apertura debe ser anterior a la de cierre.")
+        else:
+            # 2. Si está cerrado, debe haber motivo
+            if not motivo:
+                raise serializers.ValidationError("Debe indicar un motivo si la cancha está cerrada ese día.")
+
+        # 3. Traslape de excepciones en misma fecha
+        qs = DateException.objects.filter(cancha=cancha, fecha=fecha)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        # Si tiene horas y no está cerrado, valida solapamiento
+        if not cerrado and ap and ci and qs.filter(
+            hora_apertura__lt=ci,
+            hora_cierre__gt=ap
+        ).exists():
+            raise serializers.ValidationError("El horario especial se traslapa con otra excepción existente para esa fecha.")
+
+        return attrs

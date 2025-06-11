@@ -11,7 +11,7 @@ def notificar_reserva(sender, instance, created, **kwargs):
         print("⚠️ El usuario no tiene número asignado.")
         return
 
-    # ✅ 1. Al crear la reserva
+
     if created:
         mensaje = (
             "📢 ¡Tu reserva ha sido registrada!\n\n"
