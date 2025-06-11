@@ -6,8 +6,17 @@ from .models import SoccerField
 from .serializer import FieldSerializer
 
 
+
 class FieldViewSet(viewsets.ModelViewSet):
-    queryset= SoccerField.objects.all()
-    serializer_class= FieldSerializer
+    queryset = SoccerField.objects.all().order_by('id')
+    serializer_class = FieldSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     authentication_classes = [SupabaseRemoteAuth]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        available = self.request.query_params.get('available')
+        if available is not None:
+            val = True if available.lower() == 'true' else False
+            qs = qs.filter(available=val)
+        return qs

@@ -1,32 +1,49 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from cancha.models import SoccerField
 
-class HorarioDisponible(models.Model):
-    DIAS_SEMANA = [
-        ('Lunes', 'Lunes'),
-        ('Martes', 'Martes'),
-        ('Miércoles', 'Miércoles'),
-        ('Jueves', 'Jueves'),
-        ('Viernes', 'Viernes'),
-        ('Sábado', 'Sábado'),
-        ('Domingo', 'Domingo'),
+class WeeklySchedule(models.Model):
+    DIA_CHOICES = [
+        (0, "Lunes"),
+        (1, "Martes"),
+        (2, "Miércoles"),
+        (3, "Jueves"),
+        (4, "Viernes"),
+        (5, "Sábado"),
+        (6, "Domingo"),
     ]
 
-    diaSemana = models.CharField(max_length=20, choices=DIAS_SEMANA)
-    horaInicio = models.TimeField()
-    horaFin = models.TimeField()
-    disponible = models.BooleanField(default=True)
-    motivo_bloqueo = models.TextField(blank=True, null=True)  #Agregado recientemente
-    cancha = models.ForeignKey(SoccerField, on_delete=models.CASCADE, related_name="horarios")
+    cancha = models.ForeignKey(
+        SoccerField, on_delete=models.CASCADE, related_name="weekly_schedules"
+    )
+    dia = models.IntegerField(choices=DIA_CHOICES)
+    hora_apertura = models.TimeField()
+    hora_cierre = models.TimeField()
+    cerrado = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("cancha", "dia")
+        ordering = ["dia"]
 
     def __str__(self):
-        estado = "Disponible" if self.disponible else "No Disponible"
-        return f"{self.cancha} - {self.diaSemana} de {self.horaInicio} a {self.horaFin} ({estado})"
+        if self.cerrado:
+            return f"{self.get_dia_display()}: Cerrado"
+        return f"{self.get_dia_display()} {self.hora_apertura}–{self.hora_cierre}"
+    
+class DateException(models.Model):
+    cancha = models.ForeignKey(
+        SoccerField, on_delete=models.CASCADE, related_name="date_exceptions"
+    )
+    fecha = models.DateField()
+    hora_apertura = models.TimeField(null=True, blank=True)
+    hora_cierre = models.TimeField(null=True, blank=True)
+    cerrado = models.BooleanField(default=True)
+    motivo = models.CharField(max_length=200, blank=True)
 
-    def clean(self):
-        if self.horaInicio >= self.horaFin:
-            raise ValidationError("La hora de inicio debe ser anterior a la hora fin.")
-            
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    class Meta:
+        unique_together = ("cancha", "fecha")
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        if self.cerrado:
+            return f"{self.fecha}: Cerrado ({self.motivo})"
+        return f"{self.fecha} {self.hora_apertura}–{self.hora_cierre}"

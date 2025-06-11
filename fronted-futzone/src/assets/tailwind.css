@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  @apply text-gray-900;
+  background-color: #F5F8FD;
+  @apply font-poppins;
+}

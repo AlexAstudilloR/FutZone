@@ -2,9 +2,10 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
-load_dotenv()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 SECRET_KEY = 'django-insecure-%n!)s(pm^e-udpj9&2ti*1_!)8gtap2dp8&!th36@nefc6ukub'
 DEBUG = True
 
@@ -32,10 +33,12 @@ INSTALLED_APPS = [
      'cancha',
      'profiles',
      #Librerias instaladas
-     'rest_framework'
+     'rest_framework',
+     'corsheaders'
 ]
 
 MIDDLEWARE = [
+     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,17 +73,23 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE':10
+    
 }
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+]
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'), 
+       'NAME': 'bdd_titulacion',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -118,6 +127,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')  # Carpeta donde tú pones tus archivos estáticos
 ]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Solo se usa en producción
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
