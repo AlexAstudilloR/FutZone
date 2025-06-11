@@ -1,0 +1,34 @@
+{
+  "name": "fronted-futzone",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/vue-fontawesome": "^3.0.8",
+    "@primeuix/themes": "^1.1.1",
+    "@supabase/supabase-js": "^2.50.0",
+    "aos": "^2.3.4",
+    "axios": "^1.9.0",
+    "dayjs": "^1.11.13",
+    "daysjs": "^1.0.2",
+    "pinia": "^3.0.3",
+    "primevue": "^4.3.5",
+    "vue": "^3.5.13",
+    "vue-cal": "^4.10.2",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "autoprefixer": "10.4.19",
+    "postcss": "8.4.38",
+    "tailwindcss": "3.4.1",
+    "vite": "^6.3.5"
+  }
+}
