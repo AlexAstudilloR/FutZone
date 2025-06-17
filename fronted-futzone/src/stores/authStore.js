@@ -8,18 +8,24 @@ export const useAuthStore = defineStore("auth", {
     token: null,
     profile: null,
     error: null,
+    isReady: false, 
   }),
+
   actions: {
     async init() {
+      this.isReady = false; 
       const token = localStorage.getItem("access_token");
-      if (!token) return;
+      if (!token) {
+        this.isReady = true;
+        return;
+      }
 
       this.token = token;
 
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error || !data.user) {
-          console.warn(" No se pudo recuperar usuario:", error);
+          console.warn("No se pudo recuperar usuario:", error);
           await this.logout();
           return;
         }
@@ -31,11 +37,15 @@ export const useAuthStore = defineStore("auth", {
       } catch (err) {
         console.error("Error al inicializar sesión:", err);
         await this.logout();
+      } finally {
+        this.isReady = true; 
       }
     },
 
     async login(email, password) {
       this.error = null;
+      this.isReady = false;
+
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -49,6 +59,7 @@ export const useAuthStore = defineStore("auth", {
           } else {
             this.error = "Error al iniciar sesión";
           }
+          this.isReady = true;
           return false;
         }
 
@@ -63,6 +74,8 @@ export const useAuthStore = defineStore("auth", {
       } catch (err) {
         this.error = "Error inesperado al intentar iniciar sesión";
         return false;
+      } finally {
+        this.isReady = true;
       }
     },
 
@@ -84,12 +97,14 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async logout() {
+      this.isReady = false;
       this.user = null;
       this.token = null;
       this.profile = null;
       this.error = null;
       localStorage.removeItem("access_token");
       await supabase.auth.signOut();
+      this.isReady = true;
     },
   },
 });

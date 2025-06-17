@@ -28,7 +28,9 @@
     </div>
 
     <div class="flex-grow">
-      <div v-if="store.appointments.length > 0">
+      <div v-if="store.loading" class="text-center py-10">Cargando...</div>
+
+      <div v-else-if="store.appointments.length > 0">
         <div v-for="appointment in sortedAppointments" :key="appointment.id">
           <AppointmentCard
             :appointment="appointment"
@@ -37,8 +39,9 @@
           />
         </div>
       </div>
+
       <NoData
-        v-else-if="!store.loading"
+        v-else
         :message="`No hay reservas ${
           selectedStatus === 'pending'
             ? 'pendientes'
@@ -48,11 +51,12 @@
       />
     </div>
 
-    <div class="mt-auto pt-6">
+    <div class="mt-6 flex justify-center">
       <Pagination
-        v-if="!store.loading && store.totalCount > 0"
+        v-if="store.totalCount > 0"
         :currentPage="currentPage"
         :totalItems="store.totalCount"
+        :itemsPerPage="itemsPerPage"
         @update:page="goToPage"
       />
     </div>
@@ -60,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from "vue"
+import { ref, computed, watchEffect ,watch} from "vue"
 import AppointmentCard from "../../components/ui/AppointmentCard.vue"
 import Pagination from "../../components/ui/Pagination.vue"
 import LinkButton from "../../components/ui/LinkButton.vue"
@@ -70,6 +74,7 @@ import { useAppointmentStore } from "../../stores/appointmentStore"
 
 const store = useAppointmentStore()
 const currentPage = ref(1)
+const itemsPerPage = 10
 const sortOrder = ref("asc")
 const selectedStatus = ref("pending")
 
@@ -80,13 +85,13 @@ const statusTabs = [
 ]
 
 const loadAppointments = async () => {
-  const status = selectedStatus.value || "pending"
-  await store.fetchAppointments(currentPage.value, status)
+  await store.fetchAppointments(currentPage.value, selectedStatus.value)
   sortAppointments()
 }
 
 const goToPage = (page) => {
   currentPage.value = page
+  loadAppointments()
 }
 
 const updateStatus = async (id, status) => {
@@ -104,8 +109,12 @@ const sortAppointments = () => {
 
 const sortedAppointments = computed(() => store.appointments)
 
-watchEffect(() => {
+watch(selectedStatus, () => {
   currentPage.value = 1
+  loadAppointments()
+})
+
+watch(currentPage, () => {
   loadAppointments()
 })
 </script>

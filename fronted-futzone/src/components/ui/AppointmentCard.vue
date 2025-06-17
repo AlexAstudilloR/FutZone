@@ -9,7 +9,7 @@
     <div class="flex flex-col md:flex-row justify-between w-full gap-4">
       <!-- Info principal -->
       <div class="grid grid-cols-2 gap-y-1 text-sm flex-1">
-        <p><strong>Cliente:</strong> {{ appointment.user_name }}</p>
+        <p><strong>Cliente:</strong> {{ appointment.user_full_name }}</p>
         <p><strong>Fecha:</strong> {{ appointment.date }}</p>
         <p><strong>Horario:</strong> {{ appointment.time_start }}–{{ appointment.time_end }}</p>
         <p><strong>Cancha:</strong> {{ appointment.field_name }}</p>

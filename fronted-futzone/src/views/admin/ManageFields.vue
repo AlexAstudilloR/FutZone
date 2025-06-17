@@ -25,9 +25,14 @@
     </div>
 
     <div v-if="loading" class="text-center py-10">Cargando...</div>
+
     <div v-else>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto mb-6">
         <DataTable :items="fields" :columns="columns">
+          <template #available="{ item }">
+            {{ item.available ? "Disponible" : "Cerrada" }}
+          </template>
+
           <template #actions="{ item }">
             <div
               class="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-2"
@@ -54,14 +59,15 @@
           </template>
         </DataTable>
       </div>
+    </div>
 
-      <div class="mt-4 flex justify-center">
-        <Pagination
-          :currentPage="currentPage"
-          :totalItems="totalCount"
-          @update:page="onPageChange"
-        />
-      </div>
+    <!-- Pagination al fondo de toda la vista -->
+    <div class="mt-10 flex justify-center">
+      <Pagination
+        :currentPage="currentPage"
+        :totalItems="totalCount"
+        @update:page="onPageChange"
+      />
     </div>
 
     <GenericModal
@@ -87,6 +93,7 @@
     />
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useFieldStore } from "../../stores/fieldStore";
@@ -154,6 +161,7 @@ const fieldConfig = [
 const loading = computed(() => store.loading);
 const fields = computed(() => store.fields);
 const totalCount = computed(() => store.fields.length);
+
 function closeCreateModal() {
   showCreate.value = false;
   errors.value = {};
@@ -163,6 +171,7 @@ function closeEditModal() {
   showEdit.value = false;
   errors.value = {};
 }
+
 async function loadPage(page = 1) {
   currentPage.value = page;
   await store.fetchFields();
@@ -185,18 +194,11 @@ function confirmDelete(id) {
 }
 
 async function handleCreate(formValues) {
-  console.log("Llamando a store.createField con:", formValues)
-
   const formData = new FormData();
   for (const key in formValues) {
     if (formValues[key] !== undefined && formValues[key] !== null) {
       formData.append(key, formValues[key]);
     }
-  }
-
-  // Debug: ver qué se está enviando
-  for (const [key, val] of formData.entries()) {
-    console.log(`${key}:`, val);
   }
 
   const { success, error } = await store.createField(formData);
@@ -206,7 +208,6 @@ async function handleCreate(formValues) {
     errors.value = {};
     loadPage(currentPage.value);
   } else {
-    console.log("Error devuelto del store:", error);
     errors.value = { ...error };
   }
 }
@@ -223,6 +224,7 @@ async function handleUpdate(data) {
     selectedField.value.id,
     formData
   );
+
   if (success) {
     showEdit.value = false;
     errors.value = {};
@@ -231,5 +233,6 @@ async function handleUpdate(data) {
     errors.value = { ...error };
   }
 }
+
 onMounted(() => loadPage());
 </script>

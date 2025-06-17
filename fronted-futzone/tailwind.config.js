@@ -7,8 +7,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-    }},
+        manrope: ['Manrope', 'sans-serif'],
+
+        sans: ['Manrope', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }

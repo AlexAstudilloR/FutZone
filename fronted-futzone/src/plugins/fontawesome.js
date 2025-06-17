@@ -1,5 +1,6 @@
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+
 import {
   faFutbol,
   faClock,
@@ -18,9 +19,15 @@ import {
   faPlus,
   faPenToSquare,
   faTrash,
-  faArrowUpFromBracket
+  faArrowUpFromBracket,
+  faChartLine,
+  faDollarSign,
+  faBolt,
+  faGaugeHigh,
+  faCircleCheck,
+  faCircleXmark,
+  faHourglassHalf
 } from "@fortawesome/free-solid-svg-icons";
-
 
 library.add(
   faFutbol,
@@ -40,7 +47,14 @@ library.add(
   faPlus,
   faPenToSquare,
   faTrash,
-  faArrowUpFromBracket
+  faArrowUpFromBracket,
+  faChartLine,
+  faDollarSign,
+  faBolt,
+  faGaugeHigh,
+  faCircleCheck,
+  faCircleXmark,
+  faHourglassHalf
 );
 
 export default FontAwesomeIcon;

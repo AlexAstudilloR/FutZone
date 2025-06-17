@@ -129,7 +129,7 @@ class MyProfileView(APIView):
     def get(self, request):
         profile = request.user
         return Response({
-            "id": profile.id,
+
             "full_name": profile.full_name,
             "cell_phone": profile.cell_phone,
             "is_admin": profile.is_admin,

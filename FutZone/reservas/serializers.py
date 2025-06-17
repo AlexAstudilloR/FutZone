@@ -7,15 +7,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
     valor_pagar = serializers.DecimalField(
         max_digits=6, decimal_places=2, read_only=True
     )
+    user_full_name = serializers.CharField(source='user.full_name', read_only=True)
+    field_name = serializers.CharField(source='field.name', read_only=True)
 
     class Meta:
         model = Appointment
-
         fields = [
-            'id', 'field', 'date', 'time_start', 'time_end',
+            'id', 'user', 'user_full_name',
+            'field', 'field_name',
+            'date', 'time_start', 'time_end',
             'valor_pagar', 'status', 'created_at'
         ]
-        read_only_fields = ['id', 'valor_pagar','created_at']
+        read_only_fields = ['id', 'valor_pagar', 'created_at' ,'user']
 
     def validate(self, data):
 
