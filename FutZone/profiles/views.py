@@ -7,7 +7,7 @@ from pytz import UTC
 import requests
 import os
 import dotenv
-
+import re
 from .models import ProfileModel
 from .serializer import ProfileSerializer
 
@@ -20,8 +20,24 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 def validate_registration_data(data):
     required_fields = ["email", "password", "full_name"]
     missing = [field for field in required_fields if not data.get(field)]
+
     if missing:
         return False, {"error": f"Faltan campos requeridos: {', '.join(missing)}"}
+
+    if len(data["password"]) < 6:
+        return False, {"error": "La contraseña debe tener al menos 6 caracteres."}
+
+    if "@" not in data["email"]:
+        return False, {"error": "El correo no es válido."}
+
+    full_name = data["full_name"]
+    if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+", full_name):
+        return False, {"error": "El nombre solo puede contener letras y espacios."}
+
+    cell_phone = data.get("cell_phone", "")
+    if cell_phone and not re.fullmatch(r"09\d{8}", cell_phone):
+        return False, {"error": "El número de celular debe comenzar con 09 y tener 10 dígitos."}
+
     return True, None
 
 
@@ -70,7 +86,16 @@ class RegisterView(APIView):
         )
 
         if res.status_code != 200:
-            return Response(res.json(), status=res.status_code)
+            error_msg = res.json().get("msg", "Error desconocido al registrar usuario.")
+
+            traducciones = {
+                "Password should be at least 6 characters": "La contraseña debe tener al menos 6 caracteres.",
+                "User already registered": "Este correo ya está registrado.",
+                "A user with this email address has already been registered": "Ya hay un usuario registrado con este correo"
+            }
+
+            error_traducido = traducciones.get(error_msg, error_msg)
+            return Response({"error": error_traducido}, status=res.status_code)
 
         user = res.json()
         user_id = user.get("id")
@@ -86,7 +111,6 @@ class RegisterView(APIView):
                 created_at=datetime.now(UTC),
             )
         except Exception:
-
             requests.delete(
                 f"{SUPABASE_URL}/auth/v1/admin/users/{user_id}",
                 headers={
@@ -97,11 +121,13 @@ class RegisterView(APIView):
             return Response({"error": "Error al crear perfil. Usuario eliminado."}, status=500)
 
         return Response({"message": "Usuario y perfil creados correctamente"}, status=201)
+
+
 class MyProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        profile = request.user  
+        profile = request.user
         return Response({
             "id": profile.id,
             "full_name": profile.full_name,

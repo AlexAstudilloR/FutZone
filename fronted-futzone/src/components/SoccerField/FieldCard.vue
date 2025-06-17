@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-white shadow-md rounded-xl p-4 w-full max-w-xs mx-auto text-center space-y-3"
+    class="bg-white shadow-md rounded-xl p-4 w-full max-w-xs mx-auto text-center space-y-3 hover:scale-[1.05] transition-all"
   >
     <h2 class="text-lg font-semibold">{{ nombre }}</h2>
 

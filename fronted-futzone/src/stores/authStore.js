@@ -19,7 +19,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error || !data.user) {
-          console.warn("⚠️ No se pudo recuperar usuario:", error);
+          console.warn(" No se pudo recuperar usuario:", error);
           await this.logout();
           return;
         }
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore("auth", {
         const profileRes = await getMyProfile();
         this.profile = profileRes.data;
       } catch (err) {
-        console.error("❌ Error al inicializar sesión:", err);
+        console.error("Error al inicializar sesión:", err);
         await this.logout();
       }
     },
@@ -43,7 +43,12 @@ export const useAuthStore = defineStore("auth", {
         });
 
         if (error) {
-          this.error = error.message;
+          const msg = error.message;
+          if (msg === "Invalid login credentials") {
+            this.error = "Correo o contraseña incorrectos";
+          } else {
+            this.error = "Error al iniciar sesión";
+          }
           return false;
         }
 
@@ -56,19 +61,24 @@ export const useAuthStore = defineStore("auth", {
 
         return true;
       } catch (err) {
-        console.error("💥 Error al iniciar sesión:", err);
         this.error = "Error inesperado al intentar iniciar sesión";
         return false;
       }
     },
 
-    async register(payload) {
+    async register(data) {
       this.error = null;
       try {
-        const res = await registerUser(payload);
+        const res = await registerUser(data);
+
+        if (res.data?.error) {
+          this.error = res.data.error;
+          return { success: false, error: this.error };
+        }
+
         return { success: true, data: res.data };
       } catch (err) {
-        this.error = err.response?.data || "Error en el registro";
+        this.error = err.response?.data?.error || "Error al registrar usuario";
         return { success: false, error: this.error };
       }
     },

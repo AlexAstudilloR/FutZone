@@ -17,7 +17,8 @@ import {
   faArrowLeft,
   faPlus,
   faPenToSquare,
-  faTrash
+  faTrash,
+  faArrowUpFromBracket
 } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -38,7 +39,8 @@ library.add(
   faArrowLeft,
   faPlus,
   faPenToSquare,
-  faTrash
+  faTrash,
+  faArrowUpFromBracket
 );
 
 export default FontAwesomeIcon;

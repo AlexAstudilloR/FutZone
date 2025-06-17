@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 defineOptions({ name: 'BaseInput' })
 
 const props = defineProps({
@@ -10,15 +10,32 @@ const props = defineProps({
   },
   label: String,
   placeholder: String,
-  icon: String,
+  icon: {
+    type: [String, Array, Object],
+    default: null,
+  },
+  error: {
+    type: String,
+    default: '',
+  },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'input'])
 
 const inputType = ref(props.type)
 const togglePassword = () => {
   inputType.value = inputType.value === 'password' ? 'text' : 'password'
 }
+
+const hasIcon = computed(() => !!props.icon)
+const hasToggle = computed(() => props.type === 'password')
+
+const inputClasses = computed(() => [
+  'w-full py-2 border rounded outline-none text-sm transition',
+  hasIcon.value ? 'pl-10' : 'pl-3',
+  hasToggle.value ? 'pr-10' : 'pr-3',
+  props.error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#19296D]',
+])
 </script>
 
 <template>
@@ -27,24 +44,26 @@ const togglePassword = () => {
       {{ label }}
     </label>
 
+    <p v-if="error" class="text-red-500 text-xs -mt-1">{{ error }}</p>
+
     <div class="relative">
-      <!-- Ícono izquierdo -->
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+      <div
+        v-if="hasIcon"
+        class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500"
+      >
         <font-awesome-icon :icon="icon" />
       </div>
 
-      <!-- Input -->
       <input
         :type="inputType"
         :placeholder="placeholder"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
-        class="w-full pl-10 pr-10 py-2 border rounded outline-[#19296D] text-sm"
+        @input="$emit('update:modelValue', $event.target.value); $emit('input')"
+        :class="inputClasses"
       />
 
-      <!-- Toggle mostrar contraseña -->
       <button
-        v-if="type === 'password'"
+        v-if="hasToggle"
         type="button"
         class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
         @click="togglePassword"

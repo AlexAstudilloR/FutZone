@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
 import BaseInput from '../../components/ui/BaseInput.vue'
@@ -9,20 +9,19 @@ const password = ref('')
 const auth = useAuthStore()
 const router = useRouter()
 
+const errorMessage = computed(() => auth.error)
+
 const handleLogin = async () => {
+  auth.error = null
   const success = await auth.login(email.value, password.value)
   if (success) {
-    router.push('/canchas') 
-  } else {
-    alert('Login fallido') 
+    router.push('/canchas')
   }
 }
-
 </script>
 
 <template>
   <div class="w-full max-w-md p-8 space-y-5">
-    <!-- Logo y título -->
     <div class="text-center">
       <img src="/logo.png" alt="Logo" class="w-24 mx-auto mb-4" />
       <h1 class="text-xl md:text-2xl xl:text-3xl font-bold text-[#19296D]">
@@ -30,13 +29,13 @@ const handleLogin = async () => {
       </h1>
     </div>
 
-    <!-- Inputs usando el componente BaseInput -->
     <BaseInput
       v-model="email"
       type="email"
       label="Correo"
       placeholder="mail@example.com"
       icon="fa-envelope"
+      @input="auth.error = null"
     />
 
     <BaseInput
@@ -45,9 +44,9 @@ const handleLogin = async () => {
       label="Contraseña"
       placeholder="********"
       icon="fa-lock"
+      @input="auth.error = null"
     />
 
-    <!-- Botón -->
     <button
       @click="handleLogin"
       class="w-full bg-[#19296D] text-white py-2 rounded hover:bg-blue-900 transition"
@@ -55,6 +54,9 @@ const handleLogin = async () => {
       Login
     </button>
 
+    <p v-if="errorMessage" class="text-red-500 text-sm text-center">
+      {{ errorMessage }}
+    </p>
 
     <p class="text-center text-sm mt-4">
       ¿No tienes cuenta?

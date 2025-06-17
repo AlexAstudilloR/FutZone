@@ -7,20 +7,14 @@ from .models import WeeklySchedule, DateException
 from .serializers import WeeklyScheduleSerializer, DateExceptionSerializer
 
 class WeeklyScheduleViewSet(viewsets.ModelViewSet):
-    """
-    CRUD de horarios semanales + un endpoint extra 'dias-choices' para 
-    obtener todos los días disponibles.
-    """
+
     queryset = WeeklySchedule.objects.all().order_by('cancha', 'dia')
     serializer_class = WeeklyScheduleSerializer
     permission_classes = [IsAdminOrReadOnly]
 
     @action(detail=False, methods=['get'], url_path='dias-choices')
     def dias_choices(self, request):
-        """
-        /api/weekly-schedules/dias-choices/
-        Devuelve [{"value": 0, "label": "Lunes"}, …]
-        """
+
         data = [
             {"value": val, "label": lbl}
             for val, lbl in WeeklySchedule.DIA_CHOICES
@@ -38,10 +32,6 @@ class DateExceptionViewSet(viewsets.ModelViewSet):
 
 
 class DateExceptionByDateAPIView(APIView):
-    """
-    Devuelve las excepciones puntuales para una fecha dada.
-    Lectura abierta, escritura limitada a admins (aunque POST/PUT no se usan aquí).
-    """
     permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request):

@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center gap-2 mt-4">
-    <!-- Flecha izquierda -->
+
     <button
       :disabled="currentPage === 1"
       @click="$emit('update:page', currentPage - 1)"
@@ -21,7 +21,7 @@
       {{ page }}
     </button>
 
-    <!-- Flecha derecha -->
+
     <button
       :disabled="currentPage === totalPages"
       @click="$emit('update:page', currentPage + 1)"

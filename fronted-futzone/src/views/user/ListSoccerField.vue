@@ -19,7 +19,7 @@ onMounted(() => {
       </p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
       <SoccerFieldCard
         v-for="field in fieldStore.fields"
         :key="field.id"

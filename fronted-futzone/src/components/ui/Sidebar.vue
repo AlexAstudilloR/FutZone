@@ -5,63 +5,53 @@
       isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
     ]"
   >
-
     <div>
-      <!-- Logo -->
       <div class="flex items-center space-x-2">
         <img src="/logo.png" alt="Logo" class="h-10 w-auto" />
         <h1 class="text-lg font-bold">FutZone</h1>
       </div>
 
-
       <nav class="space-y-2 mt-6">
         <router-link
           v-if="authStore.profile?.is_admin"
           to="/admin"
-          class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
+          class="flex items-center gap-3 px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-[#15215c] hover:text-gray-200"
         >
-          <font-awesome-icon icon="gear" />
+          <font-awesome-icon icon="gear" class="transition-colors duration-200" />
           <span>Administrar</span>
         </router-link>
+
         <router-link
           to="/canchas"
-          class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
+          class="flex items-center gap-3 px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-[#15215c] hover:text-gray-200"
         >
-          <font-awesome-icon icon="futbol" />
+          <font-awesome-icon icon="futbol" class="transition-colors duration-200" />
           <span>Canchas</span>
         </router-link>
+
         <router-link
           to="/perfil"
-          class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
+          class="flex items-center gap-3 px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-[#15215c] hover:text-gray-200"
         >
-          <font-awesome-icon icon="user" />
+          <font-awesome-icon icon="user" class="transition-colors duration-200" />
           <span>Mi perfil</span>
         </router-link>
+
         <router-link
-          to="/mis-reservas"
-          class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
+          to="/reservar"
+          class="flex items-center gap-3 px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-[#15215c] hover:text-gray-200"
         >
-          <font-awesome-icon icon="calendar-check" />
-          <span>Mis reservas</span>
-        </router-link>
-        <router-link
-          to="/reservas"
-          class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
-        >
-          <font-awesome-icon icon="calendar-check" />
+          <font-awesome-icon icon="calendar-check" class="transition-colors duration-200" />
           <span>Reservar</span>
         </router-link>
-
-
       </nav>
     </div>
 
-
     <button
-      class="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-[#15215c] transition"
+      class="flex items-center gap-3 px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-[#15215c] hover:text-gray-200"
       @click="handleLogout"
     >
-      <font-awesome-icon icon="right-from-bracket" />
+      <font-awesome-icon icon="right-from-bracket" class="transition-colors duration-200" />
       <span>Cerrar sesión</span>
     </button>
   </aside>

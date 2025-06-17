@@ -2,10 +2,12 @@
   <div class="p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">Gestionar Canchas</h1>
 
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2"
+    >
       <BaseButton
         label="Añadir cancha"
-        :icon="['fas','plus']"
+        :icon="['fas', 'plus']"
         size="md"
         variant="primary"
         extraClass="hover:opacity-90 w-full sm:w-auto"
@@ -14,7 +16,7 @@
       <LinkButton
         to="/admin"
         label="Volver a panel"
-        :icon="['fas','arrow-left']"
+        :icon="['fas', 'arrow-left']"
         size="md"
         variant="none"
         color="inherit"
@@ -27,10 +29,12 @@
       <div class="overflow-x-auto">
         <DataTable :items="fields" :columns="columns">
           <template #actions="{ item }">
-            <div class="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-2">
+            <div
+              class="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-2"
+            >
               <BaseButton
                 label="Editar"
-                :icon="['fas','pen-to-square']"
+                :icon="['fas', 'pen-to-square']"
                 size="sm"
                 variant="light"
                 textColor="blue"
@@ -39,7 +43,7 @@
               />
               <BaseButton
                 label="Eliminar"
-                :icon="['fas','trash']"
+                :icon="['fas', 'trash']"
                 size="sm"
                 variant="light"
                 textColor="inherit"
@@ -65,9 +69,10 @@
       title="Crear Cancha"
       :fields="fieldConfig"
       :initialData="{}"
-      submitLabel="Crear"
+      :submitLabel="'Crear'"
       :onSubmit="handleCreate"
-      @cancel="showCreate = false"
+      :errors="errors"
+      @cancel="closeCreateModal"
     />
 
     <GenericModal
@@ -75,9 +80,10 @@
       title="Editar Cancha"
       :fields="fieldConfig"
       :initialData="selectedField"
-      submitLabel="Actualizar"
+      :submitLabel="'Actualizar'"
       :onSubmit="handleUpdate"
-      @cancel="showEdit = false"
+      :errors="errors"
+      @cancel="closeEditModal"
     />
   </div>
 </template>
@@ -89,11 +95,13 @@ import Pagination from "../../components/ui/Pagination.vue";
 import GenericModal from "../../components/ui/GenericModal.vue";
 import DataTable from "../../components/ui/DataTable.vue";
 import BaseButton from "../../components/ui/BaseButton.vue";
+
 const store = useFieldStore();
 const currentPage = ref(1);
 const showCreate = ref(false);
 const showEdit = ref(false);
 const selectedField = ref({});
+const errors = ref({});
 
 const columns = [
   { key: "name", label: "Cancha" },
@@ -134,12 +142,27 @@ const fieldConfig = [
     placeholder: "0.00",
     required: true,
   },
+  {
+    model: "image",
+    label: "Imagen",
+    type: "file",
+    required: false,
+    accept: "image/png, image/jpeg",
+  },
 ];
 
 const loading = computed(() => store.loading);
 const fields = computed(() => store.fields);
 const totalCount = computed(() => store.fields.length);
+function closeCreateModal() {
+  showCreate.value = false;
+  errors.value = {};
+}
 
+function closeEditModal() {
+  showEdit.value = false;
+  errors.value = {};
+}
 async function loadPage(page = 1) {
   currentPage.value = page;
   await store.fetchFields();
@@ -151,6 +174,7 @@ function onPageChange(page) {
 
 function openEdit(field) {
   selectedField.value = { ...field };
+  errors.value = {};
   showEdit.value = true;
 }
 
@@ -160,21 +184,52 @@ function confirmDelete(id) {
   }
 }
 
-async function handleCreate(data) {
-  const { success } = await store.createField(data);
+async function handleCreate(formValues) {
+  console.log("Llamando a store.createField con:", formValues)
+
+  const formData = new FormData();
+  for (const key in formValues) {
+    if (formValues[key] !== undefined && formValues[key] !== null) {
+      formData.append(key, formValues[key]);
+    }
+  }
+
+  // Debug: ver qué se está enviando
+  for (const [key, val] of formData.entries()) {
+    console.log(`${key}:`, val);
+  }
+
+  const { success, error } = await store.createField(formData);
+
   if (success) {
     showCreate.value = false;
+    errors.value = {};
     loadPage(currentPage.value);
+  } else {
+    console.log("Error devuelto del store:", error);
+    errors.value = { ...error };
   }
 }
 
 async function handleUpdate(data) {
-  const { success } = await store.updateField(selectedField.value.id, data);
+  const formData = new FormData();
+  for (const key in data) {
+    if (data[key] !== undefined && data[key] !== null) {
+      formData.append(key, data[key]);
+    }
+  }
+
+  const { success, error } = await store.updateField(
+    selectedField.value.id,
+    formData
+  );
   if (success) {
     showEdit.value = false;
+    errors.value = {};
     loadPage(currentPage.value);
+  } else {
+    errors.value = { ...error };
   }
 }
-
 onMounted(() => loadPage());
 </script>

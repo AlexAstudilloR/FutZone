@@ -1,7 +1,14 @@
 <template>
-  <div :class="['rounded-xl p-4 text-center shadow-sm w-full', bgColor]">
-    <h3 class="font-semibold text-sm">{{ title }}</h3>
-    <p :class="['text-2xl font-bold', textColor]">{{ value }}</p>
+  <div
+    :class="[
+      'rounded-xl p-3 text-center shadow-sm w-full h-full min-h-[90px] max-h-[130px] flex flex-col justify-center',
+      bgColor
+    ]"
+  >
+    <div class="space-y-1">
+      <h3 class="font-semibold text-sm leading-tight">{{ title }}</h3>
+      <p :class="['text-xl font-bold', textColor]">{{ value }}</p>
+    </div>
   </div>
 </template>
 

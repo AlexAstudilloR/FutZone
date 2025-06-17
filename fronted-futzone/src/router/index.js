@@ -11,6 +11,7 @@ const Register = () => import("../views/user/Register.vue");
 const ManageAppointments =() => import("../views/admin/ManageAppointment.vue")
 const ManageFields = () => import("../views/admin/ManageFields.vue")
 const ManageSchedules = () => import("../views/admin/ManageSchedules.vue")
+const MakeAppointment =() => import( '../views/user/MakeAppointment.vue')
 const routes = [
   {
     path: "/",
@@ -26,6 +27,12 @@ const routes = [
     path: "/canchas",
     name: "Canchas",
     component: ListSoccerField,
+    meta: { layout: "default", requiresAuth: true },
+  },
+    {
+    path: "/reservar",
+    name: "Reservar",
+    component: MakeAppointment,
     meta: { layout: "default", requiresAuth: true },
   },
   {
@@ -80,7 +87,7 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
 
-  // Rutas protegidas
+
   if (to.meta.requiresAuth && !token.value) {
     return next("/login");
   }

@@ -1,19 +1,24 @@
-// stores/appointmentStore.js
 import { defineStore } from "pinia";
 import * as appointmentService from "../services/appointmentService";
+
 export const useAppointmentStore = defineStore("appointment", {
   state: () => ({
     appointments: [],
     summary: null,
+    occupiedSlots: [],
+    availableSlots: [],
     loading: false,
     error: null,
+    totalCount: 0,
+    next: null,
+    previous: null,
   }),
 
   actions: {
-    async fetchAppointments(page = 1) {
+    async fetchAppointments(page = 1, status = null) {
       this.loading = true;
       try {
-        const res = await appointmentService.getAppointments(page);
+        const res = await appointmentService.getAppointments(page, status);
         this.appointments = res.data.results;
         this.totalCount = res.data.count;
         this.next = res.data.next;
@@ -29,11 +34,9 @@ export const useAppointmentStore = defineStore("appointment", {
       this.loading = true;
       try {
         const res = fieldId
-          ? await appointmentService.getAppointmentsByFieldAndDate(
-              fieldId,
-              date
-            )
+          ? await appointmentService.getAppointmentsByFieldAndDate(fieldId, date)
           : await appointmentService.getAppointmentsByDate(date);
+
         this.summary = res.data;
       } catch (err) {
         this.error = err;
@@ -56,6 +59,19 @@ export const useAppointmentStore = defineStore("appointment", {
         await appointmentService.updateAppointmentStatus(id, status);
       } catch (err) {
         throw err;
+      }
+    },
+
+    async fetchTimeSlots(date, fieldId, slotMinutes = 60) {
+      this.loading = true;
+      try {
+        const res = await appointmentService.getTimeSlots(date, fieldId, slotMinutes);
+        this.occupiedSlots = res.data.occupied_slots;
+        this.availableSlots = res.data.available_slots;
+      } catch (err) {
+        this.error = err;
+      } finally {
+        this.loading = false;
       }
     },
   },

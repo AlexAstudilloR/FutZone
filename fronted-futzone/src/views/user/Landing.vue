@@ -23,7 +23,7 @@ onMounted(() => {
 
 <template>
   <div class="text-[#19296D] bg-white scroll-smooth">
-    <!-- HERO -->
+
     <section class="relative bg-[#19296D] text-white text-center pt-32 pb-40 px-6 overflow-hidden">
       <div class="relative z-10" data-aos="fade-up">
         <h1 class="text-4xl font-bold mb-4">Bienvenido a FutZone</h1>
@@ -40,12 +40,12 @@ onMounted(() => {
           <button
             class="border border-white px-6 py-2 rounded hover:bg-white hover:text-[#19296D] transition"
           >
-            Descargar CV
+            Contactanos
           </button>
         </div>
       </div>
 
-      <!-- WAVE DECORACIÓN -->
+ 
       <svg class="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320">
         <path
           fill="#ffffff"
@@ -55,7 +55,7 @@ onMounted(() => {
       </svg>
     </section>
 
-    <!-- QUIÉNES SOMOS -->
+
     <section id="quienes-somos" class="py-20 px-6 max-w-4xl mx-auto" data-aos="fade-up">
       <h2 class="text-3xl font-semibold mb-4">¿Quiénes somos?</h2>
       <p class="text-lg text-gray-700">
@@ -64,7 +64,7 @@ onMounted(() => {
       </p>
     </section>
 
-    <!-- MISIÓN -->
+ 
     <section id="mision" class="py-20 px-6 bg-gray-100 max-w-4xl mx-auto" data-aos="fade-up">
       <h2 class="text-3xl font-semibold mb-4">Nuestra Misión</h2>
       <p class="text-lg text-gray-700">
@@ -72,7 +72,7 @@ onMounted(() => {
       </p>
     </section>
 
-    <!-- VISIÓN -->
+
     <section id="vision" class="py-20 px-6 max-w-4xl mx-auto" data-aos="fade-up">
       <h2 class="text-3xl font-semibold mb-4">Nuestra Visión</h2>
       <p class="text-lg text-gray-700">
@@ -80,7 +80,7 @@ onMounted(() => {
       </p>
     </section>
 
-    <!-- CARACTERÍSTICAS -->
+  
     <section
       id="caracteristicas"
       class="py-20 px-6 bg-gray-100 max-w-5xl mx-auto"
