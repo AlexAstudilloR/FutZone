@@ -101,6 +101,7 @@ import BaseInput from "../../components/ui/BaseInput.vue";
 import BaseSelect from "../../components/ui/BaseSelect.vue";
 import BaseButton from "../../components/ui/BaseButton.vue";
 import TimeSlots from "../../components/ui/TimeSlots.vue";
+import { toast } from 'vue3-toastify'
 
 const appointmentStore = useAppointmentStore();
 const fieldStore = useFieldStore();

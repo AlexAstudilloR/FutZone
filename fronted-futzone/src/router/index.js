@@ -5,13 +5,14 @@ import NotFound from "../views/user/NotFound.vue";
 
 const ListSoccerField = () => import("../views/user/ListSoccerField.vue");
 const LandingPage = () => import("../views/user/Landing.vue");
-const AdminDashboard = () => import('../views/admin/AdminDashboard.vue')
+const AdminDashboard = () => import("../views/admin/AdminDashboard.vue");
 const Login = () => import("../views/user/Login.vue");
 const Register = () => import("../views/user/Register.vue");
-const ManageAppointments =() => import("../views/admin/ManageAppointment.vue")
-const ManageFields = () => import("../views/admin/ManageFields.vue")
-const ManageSchedules = () => import("../views/admin/ManageSchedules.vue")
-const MakeAppointment =() => import( '../views/user/MakeAppointment.vue')
+const ManageAppointments = () => import("../views/admin/ManageAppointment.vue");
+const ManageFields = () => import("../views/admin/ManageFields.vue");
+const ManageSchedules = () => import("../views/admin/ManageSchedules.vue");
+const MakeAppointment = () => import("../views/user/MakeAppointment.vue");
+const Profile = () => import("../views/user/Profile.vue");
 const routes = [
   {
     path: "/",
@@ -29,10 +30,16 @@ const routes = [
     component: ListSoccerField,
     meta: { layout: "default", requiresAuth: true },
   },
-    {
+  {
     path: "/reservar",
     name: "Reservar",
     component: MakeAppointment,
+    meta: { layout: "default", requiresAuth: true },
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
     meta: { layout: "default", requiresAuth: true },
   },
   {
@@ -56,7 +63,7 @@ const routes = [
   {
     path: "/admin/schedules",
     name: "ManageSchedules",
-    component:ManageSchedules,
+    component: ManageSchedules,
     meta: { layout: "default", requiresAuth: true },
   },
   {
@@ -86,7 +93,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
-
 
   if (to.meta.requiresAuth && !token.value) {
     return next("/login");

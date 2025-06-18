@@ -12,7 +12,7 @@
         <h1 class="text-xl font-semibold tracking-wide">FutZone</h1>
       </div>
 
-      <!-- Navegación -->
+
       <nav class="space-y-2">
         <router-link
           v-if="authStore.profile?.is_admin"
@@ -40,11 +40,11 @@
         </router-link>
 
         <router-link
-          to="/perfil"
+          to="/profile"
           class="flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 hover:bg-blue-900 hover:text-gray-200"
           :class="{
             'bg-blue-900 text-gray-200 font-semibold':
-              $route.path === '/perfil',
+              $route.path === '/profile',
           }"
         >
           <font-awesome-icon icon="user" />

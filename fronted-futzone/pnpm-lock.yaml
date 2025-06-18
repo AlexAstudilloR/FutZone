@@ -47,6 +47,9 @@ importers:
       vue-cal:
         specifier: ^4.10.2
         version: 4.10.2(vue@3.5.16)
+      vue-loading-skeleton:
+        specifier: ^1.1.9
+        version: 1.1.9(vue@3.5.16)
       vue-router:
         specifier: ^4.5.1
         version: 4.5.1(vue@3.5.16)
@@ -584,6 +587,10 @@ packages:
   copy-anything@3.0.5:
     resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
     engines: {node: '>=12.13'}
+
+  core-js@2.6.12:
+    resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
+    deprecated: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -1131,6 +1138,11 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
+  vue-loading-skeleton@1.1.9:
+    resolution: {integrity: sha512-5gMrI9equv0PMVLD5EMa4NTUvqDM3Bq/wiO4NftbEaVNeoGomG/XslB4Ev8Ued+WiE2Y/9HsIx5YXhDXimyqZw==}
+    peerDependencies:
+      vue: ^2.6.11
+
   vue-router@4.5.1:
     resolution: {integrity: sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw==}
     peerDependencies:
@@ -1639,6 +1651,8 @@ snapshots:
   copy-anything@3.0.5:
     dependencies:
       is-what: 4.1.16
+
+  core-js@2.6.12: {}
 
   cross-spawn@7.0.6:
     dependencies:
@@ -2152,6 +2166,11 @@ snapshots:
 
   vue-cal@4.10.2(vue@3.5.16):
     dependencies:
+      vue: 3.5.16
+
+  vue-loading-skeleton@1.1.9(vue@3.5.16):
+    dependencies:
+      core-js: 2.6.12
       vue: 3.5.16
 
   vue-router@4.5.1(vue@3.5.16):

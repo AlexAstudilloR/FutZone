@@ -26,7 +26,12 @@ import {
   faGaugeHigh,
   faCircleCheck,
   faCircleXmark,
-  faHourglassHalf
+  faHourglassHalf,
+  faClockRotateLeft,
+  faBell,
+  faUsers,
+  faCompass,
+  
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -54,7 +59,12 @@ library.add(
   faGaugeHigh,
   faCircleCheck,
   faCircleXmark,
-  faHourglassHalf
+  faHourglassHalf,
+  faClockRotateLeft,
+  faBell,
+  faBolt,
+  faUsers,
+  faCompass
 );
 
 export default FontAwesomeIcon;
