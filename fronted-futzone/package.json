@@ -12,17 +12,20 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "@primeuix/themes": "^1.1.1",
     "@supabase/supabase-js": "^2.50.0",
     "aos": "^2.3.4",
     "axios": "^1.9.0",
     "dayjs": "^1.11.13",
     "daysjs": "^1.0.2",
     "pinia": "^3.0.3",
-    "primevue": "^4.3.5",
+    "sweetalert2": "^11.22.0",
+    "uuid": "^11.1.0",
     "vue": "^3.5.13",
     "vue-cal": "^4.10.2",
-    "vue-router": "^4.5.1"
+    "vue-loading-skeleton": "^1.1.9",
+    "vue-router": "^4.5.1",
+    "vue-sweetalert2": "^5.0.11",
+    "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

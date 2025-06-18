@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <!-- Botón hamburguesa (solo móvil) -->
+
     <button
       @click="isOpen = !isOpen"
       :class="[
@@ -17,10 +17,10 @@
       />
     </button>
 
-    <!-- Sidebar con control por prop -->
+
     <Sidebar :isOpen="isOpen" />
 
-    <!-- Contenido principal -->
+
     <div class="flex-1 min-h-screen p-4 md:ml-48">
       <router-view />
     </div>

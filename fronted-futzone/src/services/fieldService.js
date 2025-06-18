@@ -2,7 +2,8 @@ import API from './api'
 
 export const getFields = (params) => API.get('/canchas/', { params })
 
-export const createField = (data) => API.post('/canchas/', data)
+export const createField = (formData) =>
+  API.post('/canchas/', formData)
 
 export const updateField = (id, data) => API.put(`/canchas/${id}/`, data)
 

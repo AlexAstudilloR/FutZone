@@ -1,7 +1,7 @@
-// src/services/scheduleService.js
+
 import API from './api'
 
-// Weekly schedules (horarios semanales)
+
 export const getWeeklySchedules = (params = {}) =>
   API.get('/weekly-schedules/', { params })
 
@@ -14,11 +14,11 @@ export const updateWeeklySchedule = (id, data) =>
 export const deleteWeeklySchedule = (id) =>
   API.delete(`/weekly-schedules/${id}/`)
 
-// Día choices
+
 export const getDiasChoices = () =>
   API.get('/weekly-schedules/dias-choices/')
 
-// Date exceptions (excepciones puntuales)
+
 export const getDateExceptions = (params = {}) =>
   API.get('/date-exceptions/', { params })
 

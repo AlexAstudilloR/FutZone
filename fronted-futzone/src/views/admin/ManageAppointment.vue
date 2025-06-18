@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="min-h-screen flex flex-col p-6">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Gestionar Reservas</h1>
       <LinkButton
@@ -13,9 +13,10 @@
       />
     </div>
 
-    <!-- Orden -->
+    <StatusTabs v-model="selectedStatus" :tabs="statusTabs" class="mb-6" />
+
     <div class="flex items-center gap-2 mb-6">
-      <label>ordenar por fecha</label>
+      <label>Ordenar por fecha</label>
       <select
         v-model="sortOrder"
         @change="sortAppointments"
@@ -26,60 +27,94 @@
       </select>
     </div>
 
-    <div v-for="appointment in sortedAppointments" :key="appointment.id">
-      <AppointmentCard
-        :appointment="appointment"
-        @accept="updateStatus(appointment.id, 'accepted')"
-        @reject="updateStatus(appointment.id, 'rejected')"
+    <div class="flex-grow">
+      <div v-if="store.loading" class="text-center py-10">Cargando...</div>
+
+      <div v-else-if="store.appointments.length > 0">
+        <div v-for="appointment in sortedAppointments" :key="appointment.id">
+          <AppointmentCard
+            :appointment="appointment"
+            @accept="updateStatus(appointment.id, 'accepted')"
+            @reject="updateStatus(appointment.id, 'rejected')"
+          />
+        </div>
+      </div>
+
+      <NoData
+        v-else
+        :message="`No hay reservas ${
+          selectedStatus === 'pending'
+            ? 'pendientes'
+            : selectedStatus === 'accepted'
+            ? 'aceptadas'
+            : 'rechazadas'}`"
       />
     </div>
 
-    <Pagination
-      v-if="!store.loading && store.totalCount > 0"
-      :currentPage="currentPage"
-      :totalItems="store.totalCount"
-      @update:page="goToPage"
-    />
+    <div class="mt-6 flex justify-center">
+      <Pagination
+        v-if="store.totalCount > 0"
+        :currentPage="currentPage"
+        :totalItems="store.totalCount"
+        :itemsPerPage="itemsPerPage"
+        @update:page="goToPage"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import AppointmentCard from "../../components/ui/AppointmentCard.vue";
-import Pagination from "../../components/ui/Pagination.vue";
-import { useAppointmentStore } from "../../stores/appointmentStore";
-import LinkButton from "../../components/ui/LinkButton.vue";
-const store = useAppointmentStore();
-const currentPage = ref(1);
-const sortOrder = ref("asc");
+import { ref, computed, watchEffect ,watch} from "vue"
+import AppointmentCard from "../../components/ui/AppointmentCard.vue"
+import Pagination from "../../components/ui/Pagination.vue"
+import LinkButton from "../../components/ui/LinkButton.vue"
+import StatusTabs from "../../components/ui/NavBar.vue"
+import NoData from "../../components/ui/NoData.vue"
+import { useAppointmentStore } from "../../stores/appointmentStore"
 
-// Cargar reservas
+const store = useAppointmentStore()
+const currentPage = ref(1)
+const itemsPerPage = 10
+const sortOrder = ref("asc")
+const selectedStatus = ref("pending")
+
+const statusTabs = [
+  { label: "Pendientes", value: "pending" },
+  { label: "Aceptadas", value: "accepted" },
+  { label: "Rechazadas", value: "rejected" },
+]
+
 const loadAppointments = async () => {
-  await store.fetchAppointments(currentPage.value);
-  sortAppointments();
-};
+  await store.fetchAppointments(currentPage.value, selectedStatus.value)
+  sortAppointments()
+}
 
 const goToPage = (page) => {
-  currentPage.value = page;
-  loadAppointments();
-};
+  currentPage.value = page
+  loadAppointments()
+}
 
-// Cambiar estado
 const updateStatus = async (id, status) => {
-  await store.updateStatus(id, status);
-  loadAppointments();
-};
+  await store.updateStatus(id, status)
+  loadAppointments()
+}
 
-// Ordenar por fecha
 const sortAppointments = () => {
   store.appointments.sort((a, b) => {
     return sortOrder.value === "asc"
       ? new Date(a.date) - new Date(b.date)
-      : new Date(b.date) - new Date(a.date);
-  });
-};
+      : new Date(b.date) - new Date(a.date)
+  })
+}
 
-const sortedAppointments = computed(() => store.appointments);
+const sortedAppointments = computed(() => store.appointments)
 
-onMounted(loadAppointments);
+watch(selectedStatus, () => {
+  currentPage.value = 1
+  loadAppointments()
+})
+
+watch(currentPage, () => {
+  loadAppointments()
+})
 </script>
