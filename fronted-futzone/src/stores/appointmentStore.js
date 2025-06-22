@@ -74,5 +74,16 @@ export const useAppointmentStore = defineStore("appointment", {
         this.loading = false;
       }
     },
+    async fetchFieldSummaries(date) {
+      this.loading = true;
+      try {
+        const res = await appointmentService.getFieldSummaryByDate(date);
+        this.fieldSummaries = res.data.fields_summary;
+      } catch (err) {
+        this.error = err;
+      } finally {
+        this.loading = false;
+      }
+    }
   },
 });

@@ -6,15 +6,20 @@ export const getAppointments = (page = 1, status = null) =>
   API.get(BASE_URL, {
     params: {
       page,
-      ...(status && { status }), 
+      ...(status && { status }),
     },
   });
 
 export const getAppointmentsByDate = (date) =>
   API.get(`/summary/`, { params: { date } });
 
-export const getAppointmentsByFieldAndDate = (fieldId, date) =>
-  API.get(`/summary/`, { params: { date, field_id: fieldId } });
+export const getAppointmentsSummary = ({ date, fieldId = null }) =>
+  API.get(`/summary/`, {
+    params: {
+      date,
+      ...(fieldId ? { field_id: fieldId } : {}),
+    },
+  });
 
 export const createAppointment = (data) => API.post("/appointments/", data);
 
@@ -29,3 +34,5 @@ export const getTimeSlots = (date, fieldId, slotMinutes = 60) =>
       slot_minutes: slotMinutes,
     },
   });
+export const getFieldSummaryByDate = (date) =>
+  API.get(`/summary/by-field/`, { params: { date } });

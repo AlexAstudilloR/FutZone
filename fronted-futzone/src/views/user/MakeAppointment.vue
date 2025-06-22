@@ -80,6 +80,7 @@
             v-if="form.field && form.date"
             :field-id="form.field"
             :date="form.date"
+            @slotSelected="setTimeRange"
           />
           <div v-else class="text-gray-500 text-sm animate-fade-in">
             Selecciona una
@@ -90,25 +91,51 @@
         </transition>
       </div>
     </div>
+
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <GenericModal
+      :isOpen="showModal"
+      :title="modalTitle"
+      :fields="[]"
+      :submitLabel="'Ir a mi perfil'"
+      :onSubmit="goToProfile"
+      @cancel="showModal = false"
+    >
+      <template #default>
+        <p
+          class="text-gray-700 text-sm leading-relaxed mb-4 whitespace-pre-line"
+        >
+          {{ modalMessage }}
+        </p>
+      </template>
+    </GenericModal>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useFieldStore } from "../../stores/fieldStore";
 import BaseInput from "../../components/ui/BaseInput.vue";
 import BaseSelect from "../../components/ui/BaseSelect.vue";
 import BaseButton from "../../components/ui/BaseButton.vue";
 import TimeSlots from "../../components/ui/TimeSlots.vue";
-import { toast } from 'vue3-toastify'
+import GenericModal from "../../components/ui/GenericModal.vue";
+import { toast } from "vue3-toastify";
 
 const appointmentStore = useAppointmentStore();
 const fieldStore = useFieldStore();
+const router = useRouter();
 
 const form = ref({ date: "", field: null, time_start: "", time_end: "" });
 const errors = ref({});
 const confirmationMessage = ref("");
+
+const showModal = ref(false);
+const modalTitle = ref("");
+const modalMessage = ref("");
+
 onMounted(async () => {
   await fieldStore.fetchFields({ available: true });
 });
@@ -117,11 +144,25 @@ const fieldOptions = computed(() =>
   fieldStore.fields.map((f) => ({ value: f.id, label: f.name }))
 );
 
+function setTimeRange({ start, end }) {
+  form.value.time_start = start;
+  form.value.time_end = end;
+}
+
+function goToProfile() {
+  showModal.value = false;
+  router.push("/profile");
+}
+
 async function submit() {
   errors.value = {};
   confirmationMessage.value = "";
 
   try {
+    const selectedField = fieldStore.fields.find(
+      (f) => f.id === form.value.field
+    );
+
     await appointmentStore.createAppointment({
       date: form.value.date,
       field: form.value.field,
@@ -129,14 +170,18 @@ async function submit() {
       time_end: form.value.time_end,
     });
 
-    form.value = { date: "", field: null, time_start: "", time_end: "" };
-
     toast.success("Reserva creada correctamente");
-    confirmationMessage.value =
-      "Un mensaje de confirmación le estará llegando a su WhatsApp.";
+
+    modalTitle.value = "¡Reserva confirmada!";
+    modalMessage.value = `Has reservado la cancha "${selectedField?.name}"\n
+    el día ${form.value.date} de ${form.value.time_start} a ${form.value.time_end}.
+    Un mensaje a su WhatsApp le llegará con indicaciones para el pago.`;
+
+    showModal.value = true;
+
+    form.value = { date: "", field: null, time_start: "", time_end: "" };
   } catch (err) {
     errors.value = err.response?.data || {};
-
 
     if (Object.keys(errors.value).length === 0) {
       toast.error("Ocurrió un error al crear la reserva. Intenta de nuevo.");

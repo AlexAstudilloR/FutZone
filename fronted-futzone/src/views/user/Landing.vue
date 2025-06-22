@@ -1,11 +1,9 @@
 <template>
   <div class="text-[#19296D] bg-white scroll-smooth">
-
     <section
       class="relative min-h-[85vh] flex flex-col justify-center items-center px-6 text-white text-center bg-gradient-to-br from-[#19296D] via-[#1E3A8A] to-[#3B82F6] overflow-hidden"
       data-aos="fade-up"
     >
-
       <font-awesome-icon
         icon="futbol"
         class="absolute top-12 left-12 text-white/10 text-6xl"
@@ -19,26 +17,43 @@
         class="absolute top-1/2 left-[10%] text-white/10 text-5xl -rotate-12"
       />
 
+      <div class="z-10 max-w-4xl">
+        <div
+          class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20"
+        >
+          <span
+            class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"
+          ></span>
+          Plataforma líder en reservas deportivas
+        </div>
 
-      <div class="z-10 max-w-2xl">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-          Bienvenido a <span class="text-blue-200">FutZone</span>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          Bienvenido a
+          <span
+            class="bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent"
+          >
+            FutZone
+          </span>
         </h1>
-        <p class="text-lg md:text-xl text-white/80 mb-8">
+
+        <p
+          class="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed"
+        >
           Donde el fútbol se encuentra con la tecnología. Vive la mejor
-          experiencia de reserva de canchas.
+          experiencia de reserva de canchas en tiempo real.
         </p>
+
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            class="bg-white text-[#19296D] px-6 py-2 rounded hover:bg-gray-200 transition font-semibold"
+            class="bg-white text-[#19296D] px-8 py-4 rounded-lg hover:bg-gray-100 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             @click="router.push('/login')"
           >
-            Empezar ahora
+            🚀 Empezar ahora
           </button>
           <button
-            class="border border-white px-6 py-2 rounded hover:bg-white hover:text-[#19296D] transition font-semibold"
+            class="border-2 border-white px-8 py-4 rounded-lg hover:bg-white hover:text-[#19296D] transition-all duration-300 font-semibold text-lg backdrop-blur-sm"
           >
-            Contáctanos
+            📞 Contáctanos
           </button>
         </div>
       </div>
@@ -47,17 +62,19 @@
       class="py-20 px-6 relative overflow-hidden bg-white"
       data-aos="fade-up"
     >
-   
       <div
         class="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,_rgba(25,41,109,0.05)_1px,transparent_1px)] bg-[length:40px_40px]"
       ></div>
 
-
-      <h2
-        class="text-3xl font-semibold mb-10 text-center text-[#19296D] z-10 relative will-change-transform underline underline-offset-4"
-      >
-        Sobre Nosotros
-      </h2>
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-[#19296D]">
+          Conoce FutZone
+        </h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Descubre quiénes somos, nuestra misión y visión para revolucionar las
+          reservas deportivas
+        </p>
+      </div>
 
       <div
         class="relative h-[500px] w-full flex items-center justify-center z-10"
@@ -91,7 +108,6 @@
         </div>
       </div>
 
-
       <div class="flex justify-center mt-8 space-x-4 z-10 relative">
         <button
           v-for="(_, index) in institucional"
@@ -114,9 +130,15 @@
       class="py-20 px-6 bg-gray-100 max-w-5xl mx-auto"
       data-aos="fade-up"
     >
-      <h2 class="text-3xl font-semibold mb-10 text-center">
-        Características destacadas
-      </h2>
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-[#19296D]">
+          Características Destacadas
+        </h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Descubre las funcionalidades que hacen de FutZone la mejor opción para
+          tus reservas deportivas
+        </p>
+      </div>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 text-center text-gray-700"
       >
@@ -165,24 +187,43 @@
           </p>
         </div>
       </div>
+       <div class="text-center mt-16">
+          <button 
+            class="bg-gradient-to-r from-[#19296D] to-[#3B82F6] text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            @click="router.push('/register')"
+          >
+            Prueba todas las características 🚀
+          </button>
+        </div>
     </section>
-
 
     <section
       id="colaboradores"
-      class="py-16 px-6 bg-white max-w-5xl mx-auto"
+      class="py-24 px-6 bg-gradient-to-b from-gray-50 to-white"
       data-aos="fade-up"
     >
-      <h2 class="text-3xl font-semibold mb-10 text-center">
-        Colaboradores del Software
-      </h2>
-      <div class="flex flex-wrap justify-center gap-8">
-        <AvatarCard
-          v-for="colaborador in colaboradores"
-          :key="colaborador"
-          :name="colaborador"
-          avatar="/profile.jpeg"
-        />
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6 text-[#19296D]">
+            Nuestro Equipo
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Conoce a los desarrolladores apasionados que hacen posible FutZone
+          </p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-8">
+          <AvatarCard
+            v-for="(colaborador, index) in colaboradores"
+            :key="index"
+            :name="colaborador.name"
+            :role="colaborador.role"
+            :description="colaborador.description"
+            :skills="colaborador.skills"
+            :verified="colaborador.verified"
+            :data-aos-delay="index * 100"
+          />
+        </div>
       </div>
     </section>
   </div>
@@ -200,9 +241,22 @@ import AvatarCard from "../../components/ui/AvatarCard.vue";
 const router = useRouter();
 
 const colaboradores = [
-  "Eicker Alejandro Villamar Romero",
-  "Alex Enrique Astudillo Rodríguez",
-  "Moncho Ezequiel Astudillo Rodríguez",
+  {
+    name: "Eicker Alejandro Villamar Romero",
+    role: "Frontend Developer",
+    description:
+      "Apasionado por las interfaces limpias y la experiencia de usuario moderna.",
+    skills: ["Vue3", "Tailwind", "Pinia", "Vite"],
+    verified: true,
+  },
+  {
+    name: "Alex Enrique Astudillo Rodríguez",
+    role: "Backend Developer",
+    description:
+      "Especializado en APIs robustas con Django y autenticación segura con Supabase.",
+    skills: ["Django", "DRF", "Supabase", "PostgreSQL"],
+    verified: true,
+  },
 ];
 
 const institucional = [
@@ -234,7 +288,6 @@ const institucional = [
     gradient: "from-[#6366f1] to-[#818cf8]",
   },
 ];
-
 
 const selectedCard = ref(0);
 const rotating = ref(false);

@@ -5,7 +5,7 @@
       Bienvenido al panel administrativo de FutZone
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <DashboardCard
         title="Horarios"
         icon="clock"
@@ -24,6 +24,12 @@
         iconColor="text-green-500"
         to="/admin/fields"
       />
+      <DashboardCard
+        title="Estadísticas"
+        icon="chart-line"
+        iconColor="text-orange-500"
+        to="/admin/fields"
+      />
     </div>
 
     <div class="space-y-4">
@@ -31,7 +37,7 @@
       <p>Horario - hoy {{ summary?.period }}</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <AdminBlock title="Resumen de reservas diario" :items="reservaStats">
+        <AdminBlock title="Resumen de reservas" :items="reservaStats">
           <template #default="{ item }">
             <DashboardStatCard
               :title="item.title"
@@ -110,14 +116,14 @@ const reservaStats = computed(() => [
 
 const actividadStats = computed(() => [
   {
-    title: "Canchas ocupadas",
-    value: summary.value?.total_reservations ?? 0,
+    title: "Cancha más usada",
+    value: summary.value?.most_reserved_field ?? "Ninguna",
     icon: "gauge-high",
     bgColor: "bg-indigo-200",
     textColor: "text-indigo-800",
   },
   {
-    title: "Recaudado hoy",
+    title: "Recaudado",
     value: `$${summary.value?.total_income ?? "0.00"}`,
     icon: "dollar-sign",
     bgColor: "bg-green-200",

@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from datetime import datetime
 from pytz import UTC
 import requests
@@ -40,20 +41,45 @@ def validate_registration_data(data):
 
     return True, None
 
-
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = ProfileModel.objects.all()
+    queryset = ProfileModel.objects.filter(status=True).order_by('-created_at')
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user_id = self.request.user.id
-        return ProfileModel.objects.filter(id=user_id)
+        user = self.request.user
+        all_param = self.request.query_params.get("all", "false").lower() == "true"
+
+        if user.is_admin:
+            return ProfileModel.objects.all() if all_param else ProfileModel.objects.filter(status=True)
+        return ProfileModel.objects.filter(id=user.id, status=True)
 
     def perform_create(self, serializer):
-        serializer.save(id=self.request.user.id)
+        user = self.request.user
+        data = self.request.data
+        requested_admin = str(data.get("is_admin", "false")).lower() == "true"
 
+        if requested_admin and not user.is_admin:
+            raise PermissionDenied("No tienes permisos para crear administradores.")
 
+        # Admin puede asignar el ID de otro usuario
+        if user.is_admin and "id" in data:
+            serializer.save()
+        else:
+            # Usuario común crea su propio perfil sin admin
+            serializer.save(id=user.id, is_admin=False)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.status = False  # 👈 Borrado lógico
+        instance.save()
+        return Response({"detail": "Perfil desactivado correctamente"}, status=status.HTTP_204_NO_CONTENT)
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
