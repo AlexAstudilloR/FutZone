@@ -31,7 +31,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if status_param:
             queryset = queryset.filter(status=status_param)
 
-        return queryset.order_by('id')
+        return queryset.order_by('-created_at')
     def perform_create(self, serializer):
         profile = ProfileModel.objects.get(id=self.request.user.id) 
         serializer.save(user=profile)

@@ -9,6 +9,7 @@
       <form @submit.prevent="handleSubmit">
         <template v-if="fields.length">
           <div v-for="field in fields" :key="field.model" class="mt-4">
+            <!-- Campo de archivo -->
             <div v-if="field.type === 'file'">
               <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
               <label
@@ -33,6 +34,7 @@
               </p>
             </div>
 
+            <!-- Select -->
             <div v-else-if="field.type === 'select'">
               <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
               <select
@@ -54,6 +56,15 @@
               </p>
             </div>
 
+            <!-- Checkbox -->
+            <BaseCheckbox
+              v-else-if="field.type === 'checkbox'"
+              v-model="form[field.model]"
+              :label="field.label"
+              :error="errorFor(field.model)"
+            />
+
+            <!-- Input por defecto -->
             <BaseInput
               v-else
               v-model="form[field.model]"
@@ -69,11 +80,12 @@
           </div>
         </template>
 
-
+        <!-- Contenido de slot si no hay fields -->
         <template v-else>
           <slot />
         </template>
 
+        <!-- Botones -->
         <div class="mt-6 flex justify-end gap-2">
           <button
             type="button"
@@ -97,6 +109,7 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import BaseInput from './BaseInput.vue'
+import BaseCheckbox from './BaseCheckbox.vue'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -119,6 +132,7 @@ const emit = defineEmits(['cancel', 'submit'])
 const form = reactive({})
 const previews = reactive({})
 
+// Inicializar el formulario con datos iniciales y campos por defecto
 watch(
   () => props.initialData,
   (newVal) => {
@@ -127,10 +141,23 @@ watch(
     })
 
     props.fields.forEach((f) => {
-      if (!(f.model in form)) form[f.model] = f.default ?? ''
+      if (!(f.model in form)) {
+        form[f.model] = f.type === 'checkbox' ? false : ''
+      }
     })
   },
   { immediate: true }
+)
+
+// 🔁 Si se marca "cerrado", limpiar horas
+watch(
+  () => form.cerrado,
+  (val) => {
+    if (val) {
+      form.hora_apertura = null
+      form.hora_cierre = null
+    }
+  }
 )
 
 function clearError(field) {
@@ -173,7 +200,7 @@ function onCancel() {
 
 function handleSubmit() {
   if (props.fields.length === 0) {
-    emit('submit') // no form data, solo confirmar
+    emit('submit')
     return
   }
 

@@ -4,6 +4,7 @@ import {
   createProfile,
   updateProfile,
   deleteProfile,
+  registerUser,
 } from "../services/authService";
 
 export const useProfileStore = defineStore("profile", {
@@ -14,7 +15,7 @@ export const useProfileStore = defineStore("profile", {
   }),
 
   actions: {
-     async fetchProfiles({ includeInactive = false } = {}) {
+    async fetchProfiles({ includeInactive = false } = {}) {
       this.loading = true;
       try {
         const res = await getAllProfiles(includeInactive);
@@ -42,7 +43,7 @@ export const useProfileStore = defineStore("profile", {
       this.error = null;
       try {
         const res = await updateProfile(id, data);
-        await this.fetchProfiles(); // refrescar
+        await this.fetchProfiles();
         return res.data;
       } catch (err) {
         this.error = err.response?.data || "Error al actualizar perfil.";
@@ -54,9 +55,31 @@ export const useProfileStore = defineStore("profile", {
       this.error = null;
       try {
         await deleteProfile(id);
-        await this.fetchProfiles(); // refrescar
+        await this.fetchProfiles(); 
       } catch (err) {
         this.error = "Error al eliminar perfil.";
+        throw this.error;
+      }
+    },
+
+    async createUserAndProfile(data) {
+      this.error = null;
+      try {
+        const payload = { ...data };
+        const isAdmin = payload.is_admin;
+        delete payload.is_admin;
+
+        const res = await registerUser(payload);
+        const userId = res.data?.id;
+
+        if (isAdmin && userId) {
+          await updateProfile(userId, { is_admin: true });
+        }
+
+        await this.fetchProfiles();
+        return res.data;
+      } catch (err) {
+        this.error = err.response?.data || "Error al registrar usuario.";
         throw this.error;
       }
     },

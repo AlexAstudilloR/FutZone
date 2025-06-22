@@ -43,16 +43,18 @@
           <div>
             <p class="font-semibold text-gray-800">{{ user.full_name }}</p>
             <p class="text-sm text-gray-600">
-              📞 {{ user.cell_phone || 'Sin número' }}
+              📞 {{ user.cell_phone || "Sin número" }}
             </p>
           </div>
           <span
             class="text-sm px-2 py-1 rounded font-medium"
-            :class="user.is_admin
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-700'"
+            :class="
+              user.is_admin
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-700'
+            "
           >
-            {{ user.is_admin ? 'Admin' : 'Usuario' }}
+            {{ user.is_admin ? "Admin" : "Usuario" }}
           </span>
         </div>
       </div>
@@ -74,7 +76,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useProfileStore } from "../../stores/profileStore";
-import * as authService from "../../services/authService";
+import { registerUser, getMyProfile } from "../../services/authService";
 import BaseButton from "../../components/ui/BaseButton.vue";
 import GenericModal from "../../components/ui/GenericModal.vue";
 
@@ -132,7 +134,7 @@ const openModal = () => {
 const handleCreate = async (data) => {
   formErrors.value = {};
   try {
-    await profileStore.addProfile(data);
+    await profileStore.createUserAndProfile(data);
     isModalOpen.value = false;
   } catch (err) {
     formErrors.value = err;
@@ -140,17 +142,15 @@ const handleCreate = async (data) => {
 };
 
 const fetchProfile = async () => {
-  const { data } = await authService.getMyProfile();
+  const { data } = await getMyProfile();
   profile.value = data;
 };
 
 const safeProfiles = computed(() => {
   const list = profileStore.profiles;
-  // Caso paginado DRF
   if (list?.results && Array.isArray(list.results)) {
     return list.results.filter((u) => u && u.id);
   }
-  // Caso lista plana
   if (Array.isArray(list)) {
     return list.filter((u) => u && u.id);
   }

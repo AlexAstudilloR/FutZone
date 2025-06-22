@@ -1,6 +1,6 @@
 from django.db import models
 from cancha.models import SoccerField
-
+from datetime import time
 class WeeklySchedule(models.Model):
     DIA_CHOICES = [
         (0, "Lunes"),
@@ -18,8 +18,6 @@ class WeeklySchedule(models.Model):
     dia = models.IntegerField(choices=DIA_CHOICES)
     hora_apertura = models.TimeField()
     hora_cierre = models.TimeField()
-    cerrado = models.BooleanField(default=False)
-
     class Meta:
         unique_together = ("cancha", "dia")
         ordering = ["dia"]
@@ -42,6 +40,12 @@ class DateException(models.Model):
     class Meta:
         unique_together = ("cancha", "fecha")
         ordering = ["-fecha"]
+
+    def save(self, *args, **kwargs):
+        if self.cerrado:
+            self.hora_apertura = time(0, 0)
+            self.hora_cierre = time(23, 59)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.cerrado:
