@@ -44,9 +44,6 @@ class AppointmentValidator:
         except WeeklySchedule.DoesNotExist:
             raise ValidationError("No hay un horario semanal definido para este día.")
         
-        if ws.cerrado:
-            raise ValidationError("Este día la cancha está cerrada.")
-        
         if not (ws.hora_apertura <= instance.time_start < instance.time_end <= ws.hora_cierre):
             raise ValidationError("La reserva está fuera del horario disponible semanal.")
         

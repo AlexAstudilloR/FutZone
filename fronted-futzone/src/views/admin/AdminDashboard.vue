@@ -33,7 +33,17 @@
     </div>
 
     <div class="space-y-4">
-      <h2 class="text-xl font-semibold">Estadísticas</h2>
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Estadísticas</h2>
+        <BaseButton
+          variant="success"
+          icon="file-excel"
+          @click="exportStats"
+        >
+          Exportar reporte
+        </BaseButton>
+      </div>
+
       <p>Horario - hoy {{ summary?.period }}</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -71,10 +81,12 @@ import dayjs from "dayjs";
 import DashboardCard from "../../components/admin/DashboardCard.vue";
 import DashboardStatCard from "../../components/admin/StatCard.vue";
 import AdminBlock from "../../components/admin/AdminBlock.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 
 const store = useAppointmentStore();
 const today = dayjs().format("YYYY-MM-DD");
+let isExporting = false;
 
 onMounted(() => {
   store.fetchDailySummary(today);
@@ -142,5 +154,17 @@ const formatMinutes = (mins) => {
   const h = Math.floor(mins / 60);
   const m = Math.round(mins % 60);
   return h > 0 ? `${h}h ${m > 0 ? m + "min" : ""}` : `${m}min`;
+};
+
+const exportStats = async () => {
+  if (isExporting) return;
+  isExporting = true;
+  try {
+    await store.exportReservationsExcel({ date: today });
+  } catch (err) {
+    console.error("Error al exportar Excel:", err);
+  } finally {
+    isExporting = false;
+  }
 };
 </script>

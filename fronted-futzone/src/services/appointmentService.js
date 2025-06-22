@@ -34,5 +34,12 @@ export const getTimeSlots = (date, fieldId, slotMinutes = 60) =>
       slot_minutes: slotMinutes,
     },
   });
+
 export const getFieldSummaryByDate = (date) =>
   API.get(`/summary/by-field/`, { params: { date } });
+
+export const exportReservationReport = (params) =>
+  API.get(`/export/reservations/`, {
+    params,
+    responseType: "blob",
+  });

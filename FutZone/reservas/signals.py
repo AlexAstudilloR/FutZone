@@ -4,6 +4,7 @@ from django.conf import settings
 from reservas.models import Appointment
 from utils.whatsapp import send_whatsapp_message
 
+ADMIN_NUMBER = "+593979624280"  
 @receiver(post_save, sender=Appointment)
 def notificar_reserva(sender, instance, created, **kwargs):
     numero = instance.user.cell_phone
@@ -11,49 +12,74 @@ def notificar_reserva(sender, instance, created, **kwargs):
         print("El usuario no tiene número asignado.")
         return
 
-
+    # Notificación de reserva nueva
     if created:
-        mensaje = (
+        mensaje_usuario = (
             "¡Tu reserva ha sido registrada!\n\n"
             "Realiza el pago escaneando este código QR de Peigo.\n"
             "Cuando esté confirmado, recibirás una notificación ✅"
         )
+        mensaje_admin = (
+            f"📥 Nueva reserva creada por {instance.user.full_name}.\n"
+            f"Fecha: {instance.date}\n"
+            f"Hora: {instance.time_start} - {instance.time_end}\n"
+            f"Cancha: {instance.field.name}"
+        )
         try:
-            sid = send_whatsapp_message(numero, mensaje, media_url=settings.PEIGO_QR_URL)
-            print(" WhatsApp con QR enviado. SID:", sid)
+            sid_user = send_whatsapp_message(numero, mensaje_usuario, media_url=settings.PEIGO_QR_URL)
+            sid_admin = send_whatsapp_message(ADMIN_NUMBER, mensaje_admin)
+            print("WhatsApp con QR enviado. SID usuario:", sid_user)
+            print("Notificación enviada al admin. SID:", sid_admin)
         except Exception as e:
-            print(" Error enviando QR:", e)
+            print("Error enviando mensajes de creación:", e)
         return
 
 
     try:
-        estado_anterior = Appointment.objects.get(pk=instance.pk).status
+        estado_anterior = instance._original_status
     except Appointment.DoesNotExist:
-        print(" No se pudo obtener estado anterior.")
+        print("No se pudo obtener estado anterior.")
         return
 
+    # Aceptado
     if estado_anterior != 'accepted' and instance.status == 'accepted':
-        mensaje = (
+        mensaje_usuario = (
             f"¡Reserva Confirmada!\n\n"
             f"Fecha: {instance.date}\n"
             f"Hora: {instance.time_start} - {instance.time_end}\n"
             f"Cancha: {instance.field.name}\n\n"
             "Gracias por tu pago. ¡Te esperamos!"
         )
+        mensaje_admin = (
+            f"✅ Reserva ACEPTADA:\n"
+            f"Cliente: {instance.user.full_name}\n"
+            f"Fecha: {instance.date} | {instance.time_start}-{instance.time_end}\n"
+            f"Cancha: {instance.field.name}"
+        )
         try:
-            sid = send_whatsapp_message(numero, mensaje)
-            print("WhatsApp de confirmación enviado. SID:", sid)
+            sid_user = send_whatsapp_message(numero, mensaje_usuario)
+            sid_admin = send_whatsapp_message(ADMIN_NUMBER, mensaje_admin)
+            print("Confirmación enviada. SID usuario:", sid_user)
+            print("Admin notificado. SID:", sid_admin)
         except Exception as e:
             print("Error enviando confirmación:", e)
 
-    
+    # Rechazado
     elif estado_anterior != 'rejected' and instance.status == 'rejected':
-        mensaje = (
+        mensaje_usuario = (
             "Tu reserva fue rechazada por el administrador.\n"
             "Contacta al personal para más información."
         )
+        mensaje_admin = (
+            f"❌ Reserva RECHAZADA:\n"
+            f"Cliente: {instance.user.full_name}\n"
+            f"Fecha: {instance.date} | {instance.time_start}-{instance.time_end}\n"
+            f"Cancha: {instance.field.name}"
+        )
         try:
-            sid = send_whatsapp_message(numero, mensaje)
-            print("WhatsApp de rechazo enviado. SID:", sid)
+            sid_user = send_whatsapp_message(numero, mensaje_usuario)
+            sid_admin = send_whatsapp_message(ADMIN_NUMBER, mensaje_admin)
+            print("Rechazo enviado. SID usuario:", sid_user)
+            print("Admin notificado. SID:", sid_admin)
         except Exception as e:
             print("Error enviando rechazo:", e)
