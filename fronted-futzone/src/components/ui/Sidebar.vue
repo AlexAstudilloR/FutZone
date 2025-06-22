@@ -12,8 +12,8 @@
         <h1 class="text-xl font-semibold tracking-wide">FutZone</h1>
       </div>
 
-
       <nav class="space-y-2">
+        <!-- Link admin -->
         <router-link
           v-if="authStore.profile?.is_admin"
           to="/admin"
@@ -27,36 +27,37 @@
           <span>Administrar</span>
         </router-link>
 
+        <!-- Link canchas -->
         <router-link
           to="/canchas"
           class="flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 hover:bg-blue-900 hover:text-gray-200"
           :class="{
-            'bg-blue-900 text-gray-200 font-semibold':
-              $route.path === '/canchas',
+            'bg-blue-900 text-gray-200 font-semibold': $route.path === '/canchas',
           }"
         >
           <font-awesome-icon icon="futbol" />
           <span>Canchas</span>
         </router-link>
 
+        <!-- Link perfil dinámico -->
         <router-link
-          to="/profile"
+          :to="authStore.profile?.is_admin ? '/profile-admin' : '/profile'"
           class="flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 hover:bg-blue-900 hover:text-gray-200"
           :class="{
             'bg-blue-900 text-gray-200 font-semibold':
-              $route.path === '/profile',
+              $route.path === '/profile' || $route.path === '/profile-admin',
           }"
         >
           <font-awesome-icon icon="user" />
           <span>Mi perfil</span>
         </router-link>
 
+        <!-- Link reservar -->
         <router-link
           to="/reservar"
           class="flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 hover:bg-blue-900 hover:text-gray-200"
           :class="{
-            'bg-blue-900 text-gray-200 font-semibold':
-              $route.path === '/reservar',
+            'bg-blue-900 text-gray-200 font-semibold': $route.path === '/reservar',
           }"
         >
           <font-awesome-icon icon="calendar-check" />

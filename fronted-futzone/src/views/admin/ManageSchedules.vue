@@ -41,12 +41,12 @@
   </div>
 </template>
 <script setup>
-import { onMounted, computed } from "vue";
+import { onMounted, computed , watch} from "vue";
 import { useScheduleStore } from "../../stores/scheduleStore";
 import { useFieldStore } from "../../stores/fieldStore";
 import CrudSection from "../../components/schedules/CrudSection.vue";
 import LinkButton from "../../components/ui/LinkButton.vue";
-import BaseButton from "../../components/ui/BaseButton.vue";
+
 
 const scheduleStore = useScheduleStore();
 const fieldStore = useFieldStore();
@@ -56,7 +56,6 @@ const weeklyColumns = [
   { key: "dia_display", label: "Día" },
   { key: "hora_apertura", label: "Apertura" },
   { key: "hora_cierre", label: "Cierre" },
-  { key: "cerrado_display", label: "Cerrado" },
 ];
 
 const exceptionColumns = [
@@ -83,7 +82,6 @@ const weeklyFields = computed(() => [
   },
   { prop: "hora_apertura", type: "time", label: "Apertura" },
   { prop: "hora_cierre", type: "time", label: "Cierre" },
-  { prop: "cerrado", type: "checkbox", label: "Cerrado" },
 ]);
 
 const exceptionFields = computed(() => [
@@ -106,4 +104,5 @@ onMounted(async () => {
   await scheduleStore.fetchWeekly();
   await scheduleStore.fetchExceptions();
 });
+
 </script>

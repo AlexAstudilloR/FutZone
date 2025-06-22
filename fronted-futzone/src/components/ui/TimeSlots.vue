@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- ✅ Leyenda -->
     <div
       class="flex justify-center items-center gap-6 mb-6 text-sm text-gray-700"
     >
@@ -13,7 +12,6 @@
         <span>Reservado</span>
       </div>
     </div>
-
 
     <div
       v-if="props.fieldId && props.date"
@@ -28,6 +26,7 @@
             ? 'bg-red-100 text-red-700 cursor-not-allowed'
             : 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:scale-[1.03] active:scale-95 cursor-pointer',
         ]"
+        @click="!slot.booked && emitSlotClick(slot.label)"
       >
         {{ slot.label }}
       </div>
@@ -37,7 +36,7 @@
       </p>
     </div>
 
-    <!-- ⚠️ Mensaje por si aún no se selecciona fecha/cancha -->
+   
     <div v-else class="text-center text-gray-500 mt-6">
       Selecciona una fecha y una cancha para ver los horarios disponibles.
     </div>
@@ -88,7 +87,12 @@ const allSlots = computed(() => {
 const loadSlots = () => {
   store.fetchTimeSlots(props.date, props.fieldId, props.slotMinutes);
 };
+const emit = defineEmits(["slotSelected"]);
 
+function emitSlotClick(label) {
+  const [start, end] = label.split(" - ");
+  emit("slotSelected", { start, end });
+}
 onMounted(loadSlots);
 watch(() => [props.date, props.fieldId, props.slotMinutes], loadSlots);
 </script>

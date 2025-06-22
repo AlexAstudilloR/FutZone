@@ -11,7 +11,6 @@ class WeeklyScheduleSerializer(serializers.ModelSerializer):
         write_only=True
     )
     dia_display = serializers.CharField(source='get_dia_display', read_only=True)
-    cerrado_display = serializers.SerializerMethodField()
 
     class Meta:
         model = WeeklySchedule
@@ -23,13 +22,8 @@ class WeeklyScheduleSerializer(serializers.ModelSerializer):
             'dia_display',
             'hora_apertura',
             'hora_cierre',
-            'cerrado',
-            'cerrado_display',
         ]
-        read_only_fields = ['id', 'cancha', 'dia_display', 'cerrado_display']
-
-    def get_cerrado_display(self, obj):
-        return 'Sí' if obj.cerrado else 'No'
+        read_only_fields = ['id', 'cancha', 'dia_display']
 
     def validate(self, attrs):
         cancha = attrs.get('cancha') or getattr(self.instance, 'cancha', None)
@@ -89,15 +83,20 @@ class DateExceptionSerializer(serializers.ModelSerializer):
         motivo = attrs.get('motivo', getattr(self.instance, 'motivo', ''))
 
         errors = {}
-        if not cerrado:
+
+        if cerrado:
+            # Si está cerrado, hora apertura y cierre se anulan (todo el día)
+            attrs['hora_apertura'] = None
+            attrs['hora_cierre'] = None
+
+            if not motivo:
+                errors['motivo'] = ['Debe indicar un motivo si la cancha está cerrada ese día.']
+        else:
             if not ap or not ci:
                 errors['hora_apertura'] = ['Debe especificar apertura si no está cerrado.']
                 errors['hora_cierre'] = ['Debe especificar cierre si no está cerrado.']
             elif ap >= ci:
                 errors['hora_apertura'] = ['La hora de apertura debe ser anterior a la de cierre.']
-        else:
-            if not motivo:
-                errors['motivo'] = ['Debe indicar un motivo si la cancha está cerrada ese día.']
 
         qs = DateException.objects.filter(cancha=cancha, fecha=fecha)
         if self.instance:
@@ -108,4 +107,5 @@ class DateExceptionSerializer(serializers.ModelSerializer):
 
         if errors:
             raise serializers.ValidationError(errors)
+
         return attrs

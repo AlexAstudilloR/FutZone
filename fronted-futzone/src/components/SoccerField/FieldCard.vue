@@ -23,7 +23,7 @@
 
     <button
       class="mt-2 w-full bg-green-500 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-      @click="abrirModal"
+      @click="abrirReserva"
     >
       Reservar
     </button>
@@ -34,13 +34,14 @@
 import { computed, ref } from "vue";
 
 const props = defineProps({
+  id: [Number, String], // ✅ necesario para redirección
   nombre: String,
   tipo: String,
   precio: [Number, String],
   imagen: String,
 });
 
-const emit = defineEmits(['reservar']);
+const emit = defineEmits(["reservar"]);
 
 const imageError = ref(false);
 
@@ -66,16 +67,17 @@ const imageUrl = computed(() => {
   return `${baseURL}${imagePath}`;
 });
 
-const handleImageError = () => {
+function handleImageError() {
   imageError.value = true;
-};
+}
 
-const abrirModal = () => {
+function abrirReserva() {
   emit("reservar", {
+    id: props.id, // ✅ esto es lo que faltaba
     nombre: props.nombre,
     tipo: props.tipo,
     precio: precioNumerico.value,
     imagen: imageUrl.value,
   });
-};
+}
 </script>

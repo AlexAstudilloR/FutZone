@@ -35,11 +35,13 @@
       <!-- Lista de reservas con transición -->
       <transition name="fade" mode="out-in">
         <div
-          :key="appointmentStore.loading
-            ? 'loading'
-            : appointmentStore.appointments.length === 0
-            ? 'no-data'
-            : 'data'"
+          :key="
+            appointmentStore.loading
+              ? 'loading'
+              : appointmentStore.appointments.length === 0
+              ? 'no-data'
+              : 'data'
+          "
         >
           <div v-if="appointmentStore.loading" class="space-y-4">
             <SkeletonCard
@@ -61,6 +63,7 @@
               v-for="reserva in appointmentStore.appointments"
               :key="reserva.id"
               :appointment="reserva"
+              :is-admin="authStore.profile?.is_admin"
             />
           </div>
         </div>
@@ -85,7 +88,8 @@ import BaseSelect from "../../components/ui/BaseSelect.vue";
 import NoData from "../../components/ui/NoData.vue";
 import * as authService from "../../services/authService";
 import { useAppointmentStore } from "../../stores/appointmentStore";
-
+import { useAuthStore } from "../../stores/authStore";
+const authStore = useAuthStore();
 const profile = ref({});
 const appointmentStore = useAppointmentStore();
 const selectedStatus = ref("");

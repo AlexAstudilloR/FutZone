@@ -18,6 +18,11 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  min: String,
+  max: String,
+  step: String,
+  required: Boolean,
+  disabled: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue', 'input'])
@@ -58,6 +63,11 @@ const inputClasses = computed(() => [
         :type="inputType"
         :placeholder="placeholder"
         :value="modelValue"
+        :min="min"
+        :max="max"
+        :step="step"
+        :required="required"
+        :disabled="disabled"
         @input="$emit('update:modelValue', $event.target.value); $emit('input')"
         :class="inputClasses"
       />

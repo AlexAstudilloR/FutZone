@@ -34,6 +34,7 @@
         <div v-for="appointment in sortedAppointments" :key="appointment.id">
           <AppointmentCard
             :appointment="appointment"
+            :is-admin="authStore.profile?.is_admin"
             @accept="updateStatus(appointment.id, 'accepted')"
             @reject="updateStatus(appointment.id, 'rejected')"
           />
@@ -47,7 +48,8 @@
             ? 'pendientes'
             : selectedStatus === 'accepted'
             ? 'aceptadas'
-            : 'rechazadas'}`"
+            : 'rechazadas'
+        }`"
       />
     </div>
 
@@ -64,57 +66,58 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect ,watch} from "vue"
-import AppointmentCard from "../../components/ui/AppointmentCard.vue"
-import Pagination from "../../components/ui/Pagination.vue"
-import LinkButton from "../../components/ui/LinkButton.vue"
-import StatusTabs from "../../components/ui/NavBar.vue"
-import NoData from "../../components/ui/NoData.vue"
-import { useAppointmentStore } from "../../stores/appointmentStore"
-
-const store = useAppointmentStore()
-const currentPage = ref(1)
-const itemsPerPage = 10
-const sortOrder = ref("asc")
-const selectedStatus = ref("pending")
+import { ref, computed, watchEffect, watch } from "vue";
+import AppointmentCard from "../../components/ui/AppointmentCard.vue";
+import Pagination from "../../components/ui/Pagination.vue";
+import LinkButton from "../../components/ui/LinkButton.vue";
+import StatusTabs from "../../components/ui/NavBar.vue";
+import NoData from "../../components/ui/NoData.vue";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import { useAuthStore } from "../../stores/authStore";
+const authStore = useAuthStore();
+const store = useAppointmentStore();
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const sortOrder = ref("asc");
+const selectedStatus = ref("pending");
 
 const statusTabs = [
   { label: "Pendientes", value: "pending" },
   { label: "Aceptadas", value: "accepted" },
   { label: "Rechazadas", value: "rejected" },
-]
+];
 
 const loadAppointments = async () => {
-  await store.fetchAppointments(currentPage.value, selectedStatus.value)
-  sortAppointments()
-}
+  await store.fetchAppointments(currentPage.value, selectedStatus.value);
+  sortAppointments();
+};
 
 const goToPage = (page) => {
-  currentPage.value = page
-  loadAppointments()
-}
+  currentPage.value = page;
+  loadAppointments();
+};
 
 const updateStatus = async (id, status) => {
-  await store.updateStatus(id, status)
-  loadAppointments()
-}
+  await store.updateStatus(id, status);
+  loadAppointments();
+};
 
 const sortAppointments = () => {
   store.appointments.sort((a, b) => {
     return sortOrder.value === "asc"
       ? new Date(a.date) - new Date(b.date)
-      : new Date(b.date) - new Date(a.date)
-  })
-}
+      : new Date(b.date) - new Date(a.date);
+  });
+};
 
-const sortedAppointments = computed(() => store.appointments)
+const sortedAppointments = computed(() => store.appointments);
 
 watch(selectedStatus, () => {
-  currentPage.value = 1
-  loadAppointments()
-})
+  currentPage.value = 1;
+  loadAppointments();
+});
 
 watch(currentPage, () => {
-  loadAppointments()
-})
+  loadAppointments();
+});
 </script>

@@ -5,7 +5,7 @@
       Bienvenido al panel administrativo de FutZone
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
       <DashboardCard
         title="Horarios"
         icon="clock"
@@ -24,14 +24,30 @@
         iconColor="text-green-500"
         to="/admin/fields"
       />
+      <DashboardCard
+        title="Estadísticas"
+        icon="chart-line"
+        iconColor="text-orange-500"
+        to="/admin/fields"
+      />
     </div>
 
     <div class="space-y-4">
-      <h2 class="text-xl font-semibold">Estadísticas</h2>
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Estadísticas</h2>
+        <BaseButton
+          variant="success"
+          icon="file-excel"
+          @click="exportStats"
+        >
+          Exportar reporte
+        </BaseButton>
+      </div>
+
       <p>Horario - hoy {{ summary?.period }}</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <AdminBlock title="Resumen de reservas diario" :items="reservaStats">
+        <AdminBlock title="Resumen de reservas" :items="reservaStats">
           <template #default="{ item }">
             <DashboardStatCard
               :title="item.title"
@@ -65,10 +81,12 @@ import dayjs from "dayjs";
 import DashboardCard from "../../components/admin/DashboardCard.vue";
 import DashboardStatCard from "../../components/admin/StatCard.vue";
 import AdminBlock from "../../components/admin/AdminBlock.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 
 const store = useAppointmentStore();
 const today = dayjs().format("YYYY-MM-DD");
+let isExporting = false;
 
 onMounted(() => {
   store.fetchDailySummary(today);
@@ -110,14 +128,14 @@ const reservaStats = computed(() => [
 
 const actividadStats = computed(() => [
   {
-    title: "Canchas ocupadas",
-    value: summary.value?.total_reservations ?? 0,
+    title: "Cancha más usada",
+    value: summary.value?.most_reserved_field ?? "Ninguna",
     icon: "gauge-high",
     bgColor: "bg-indigo-200",
     textColor: "text-indigo-800",
   },
   {
-    title: "Recaudado hoy",
+    title: "Recaudado",
     value: `$${summary.value?.total_income ?? "0.00"}`,
     icon: "dollar-sign",
     bgColor: "bg-green-200",
@@ -136,5 +154,17 @@ const formatMinutes = (mins) => {
   const h = Math.floor(mins / 60);
   const m = Math.round(mins % 60);
   return h > 0 ? `${h}h ${m > 0 ? m + "min" : ""}` : `${m}min`;
+};
+
+const exportStats = async () => {
+  if (isExporting) return;
+  isExporting = true;
+  try {
+    await store.exportReservationsExcel({ date: today });
+  } catch (err) {
+    console.error("Error al exportar Excel:", err);
+  } finally {
+    isExporting = false;
+  }
 };
 </script>
