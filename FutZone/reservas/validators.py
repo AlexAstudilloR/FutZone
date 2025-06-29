@@ -1,7 +1,7 @@
+from datetime import datetime, date, timedelta
 from django.core.exceptions import ValidationError
 from horario.models import WeeklySchedule, DateException
 from django.db.models import Q
-from datetime import date
 
 class AppointmentValidator:
     dias_es = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
@@ -12,20 +12,22 @@ class AppointmentValidator:
         if instance.date < date.today():
             raise ValidationError("No se puede reservar en una fecha pasada.")
         
-
         required = ['date', 'time_start', 'time_end', 'field']
         if any(getattr(instance, f, None) is None for f in required):
             return
         
-
         if instance.time_start >= instance.time_end:
             raise ValidationError("La hora de inicio debe ser menor a la hora de fin.")
         
-     
+        start_dt = datetime.combine(instance.date, instance.time_start)
+        end_dt = datetime.combine(instance.date, instance.time_end)
+        duration = (end_dt - start_dt).total_seconds() / 60
+        if duration < 30:
+            raise ValidationError("La duración mínima de una reserva debe ser de 30 minutos.")
+        
         weekday = instance.date.weekday()  
         dia_nombre = AppointmentValidator.dias_es[weekday]
         
-    
         exc_qs = DateException.objects.filter(cancha=instance.field, fecha=instance.date)
 
         cierre_total = exc_qs.filter(cerrado=True).first()
@@ -37,8 +39,6 @@ class AppointmentValidator:
             if not (especial.hora_apertura <= instance.time_start < instance.time_end <= especial.hora_cierre):
                 raise ValidationError("La reserva está fuera del horario especial definido para esa fecha.")
 
-        
-
         try:
             ws = WeeklySchedule.objects.get(cancha=instance.field, dia=weekday)
         except WeeklySchedule.DoesNotExist:
@@ -47,7 +47,6 @@ class AppointmentValidator:
         if not (ws.hora_apertura <= instance.time_start < instance.time_end <= ws.hora_cierre):
             raise ValidationError("La reserva está fuera del horario disponible semanal.")
         
-
         overlap = instance.__class__.objects.filter(
             field=instance.field,
             date=instance.date
