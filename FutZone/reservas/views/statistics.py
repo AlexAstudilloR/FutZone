@@ -7,14 +7,29 @@ from ..models import Appointment
 
 class DailyReservationSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+
     def get(self, request):
+        start_str = request.query_params.get('start_date')
+        end_str = request.query_params.get('end_date')
         date_str = request.query_params.get('date')
+
         try:
-            date = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else now().date()
+            if start_str and end_str:
+                start = datetime.strptime(start_str, "%Y-%m-%d").date()
+                end = datetime.strptime(end_str, "%Y-%m-%d").date()
+                reservations = Appointment.objects.filter(date__range=(start, end))
+                period_label = f"{start.isoformat()} to {end.isoformat()}"
+            elif date_str:
+                date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                reservations = Appointment.objects.filter(date=date)
+                period_label = date.isoformat()
+            else:
+                today = now().date()
+                reservations = Appointment.objects.filter(date=today)
+                period_label = today.isoformat()
         except ValueError:
             return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=400)
 
-        reservations = Appointment.objects.filter(date=date)
         accepted = reservations.filter(status='accepted')
         total_income = sum(r.valor_pagar or 0 for r in accepted)
 
@@ -31,7 +46,7 @@ class DailyReservationSummaryAPIView(APIView):
         most_reserved_field = field_counts[0]['field__name'] if field_counts else None
 
         return Response({
-            "period": date.isoformat(),
+            "period": period_label,
             "total_reservations": reservations.count(),
             "total_income": f"{total_income:.2f}",
             "status_breakdown": status_summary,
@@ -53,13 +68,27 @@ class FieldReservationSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
     def get(self, request):
+        start_str = request.query_params.get('start_date')
+        end_str = request.query_params.get('end_date')
         date_str = request.query_params.get('date')
+
         try:
-            date = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else now().date()
+            if start_str and end_str:
+                start = datetime.strptime(start_str, "%Y-%m-%d").date()
+                end = datetime.strptime(end_str, "%Y-%m-%d").date()
+                reservations = Appointment.objects.filter(date__range=(start, end))
+                period_label = f"{start.isoformat()} to {end.isoformat()}"
+            elif date_str:
+                date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                reservations = Appointment.objects.filter(date=date)
+                period_label = date.isoformat()
+            else:
+                today = now().date()
+                reservations = Appointment.objects.filter(date=today)
+                period_label = today.isoformat()
         except ValueError:
             return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=400)
 
-        reservations = Appointment.objects.filter(date=date)
         fields = reservations.values_list('field__id', 'field__name').distinct()
         summaries = []
 
@@ -76,6 +105,7 @@ class FieldReservationSummaryAPIView(APIView):
                 for r in field_reservations
             ]
             average_duration = round(sum(duraciones) / len(duraciones), 2) if duraciones else 0
+
             summaries.append({
                 "field_id": f_id,
                 "field_name": f_name,
@@ -84,7 +114,8 @@ class FieldReservationSummaryAPIView(APIView):
                 "status_breakdown": status_summary,
                 "average_duration_minutes": average_duration
             })
+
         return Response({
-            "date": date.isoformat(),
+            "period": period_label,
             "fields_summary": summaries
         })

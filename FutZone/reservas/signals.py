@@ -12,10 +12,13 @@ def notificar_reserva(sender, instance, created, **kwargs):
         print("El usuario no tiene número asignado.")
         return
 
-    # Notificación de reserva nueva
     if created:
         mensaje_usuario = (
-            "¡Tu reserva ha sido registrada!\n\n"
+            f"¡Tu reserva ha sido registrada!\n\n"
+            f"📅 Fecha: {instance.date}\n"
+            f"⏰ Hora: {instance.time_start} - {instance.time_end}\n"
+            f"🏟️ Cancha: {instance.field.name}\n"
+            f"💵 Valor: ${instance.valor_pagar:.2f}\n\n"
             "Realiza el pago escaneando este código QR de Peigo.\n"
             "Cuando esté confirmado, recibirás una notificación ✅"
         )
@@ -24,6 +27,7 @@ def notificar_reserva(sender, instance, created, **kwargs):
             f"Fecha: {instance.date}\n"
             f"Hora: {instance.time_start} - {instance.time_end}\n"
             f"Cancha: {instance.field.name}"
+            f"Valor a cobrar:{instance.valor_pagar}"
         )
         try:
             sid_user = send_whatsapp_message(numero, mensaje_usuario, media_url=settings.PEIGO_QR_URL)
@@ -41,7 +45,7 @@ def notificar_reserva(sender, instance, created, **kwargs):
         print("No se pudo obtener estado anterior.")
         return
 
-    # Aceptado
+
     if estado_anterior != 'accepted' and instance.status == 'accepted':
         mensaje_usuario = (
             f"¡Reserva Confirmada!\n\n"
@@ -64,7 +68,7 @@ def notificar_reserva(sender, instance, created, **kwargs):
         except Exception as e:
             print("Error enviando confirmación:", e)
 
-    # Rechazado
+
     elif estado_anterior != 'rejected' and instance.status == 'rejected':
         mensaje_usuario = (
             "Tu reserva fue rechazada por el administrador.\n"

@@ -32,16 +32,13 @@ export const useAppointmentStore = defineStore("appointment", {
       }
     },
 
-    async fetchDailySummary(date, fieldId = null) {
+    async fetchSummary({ date = null, start_date = null, end_date = null }) {
       this.loading = true;
       try {
-        const res = fieldId
-          ? await appointmentService.getAppointmentsByFieldAndDate(
-              fieldId,
-              date
-            )
-          : await appointmentService.getAppointmentsByDate(date);
-
+        const res = await appointmentService.getAppointmentsSummary({
+          ...(date && { date }),
+          ...(start_date && end_date ? { start_date, end_date } : {}),
+        });
         this.summary = res.data;
       } catch (err) {
         this.error = err;
@@ -84,10 +81,10 @@ export const useAppointmentStore = defineStore("appointment", {
       }
     },
 
-    async fetchFieldSummaries(date) {
+    async fetchFieldSummaries(params = {}) {
       this.loading = true;
       try {
-        const res = await appointmentService.getFieldSummaryByDate(date);
+        const res = await appointmentService.getFieldSummary(params);
         this.fieldSummaries = res.data.fields_summary;
       } catch (err) {
         this.error = err;
@@ -96,52 +93,28 @@ export const useAppointmentStore = defineStore("appointment", {
       }
     },
 
-    async exportReservationsExcel(param) {
+    async exportReservationsExcel(params = {}) {
       this.loading = true;
       try {
-        const date =
-          typeof param === "string"
-            ? param
-            : typeof param === "object" && param.date
-            ? param.date
-            : dayjs().format("YYYY-MM-DD");
+        const response = await appointmentService.exportReservationReport(
+          params
+        );
 
-        const [daily, fields] = await Promise.all([
-          appointmentService.getAppointmentsByDate(date),
-          appointmentService.getFieldSummaryByDate(date),
-        ]);
+        const blob = new Blob([response.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
 
-        const resumenDiario = [
-          {
-            Fecha: daily.data.period,
-            Total: daily.data.total_reservations,
-            Aceptadas: daily.data.status_breakdown?.accepted || 0,
-            Rechazadas: daily.data.status_breakdown?.rejected || 0,
-            Pendientes: daily.data.status_breakdown?.pending || 0,
-            Recaudado: daily.data.total_income,
-            "Promedio Duración (min)": daily.data.average_duration_minutes,
-            "Cancha más usada": daily.data.most_reserved_field || "N/A",
-          },
-        ];
+        const period =
+          params.date ||
+          (params.start_date && params.end_date
+            ? `${params.start_date}_a_${params.end_date}`
+            : dayjs().format("YYYY-MM-DD"));
 
-        const resumenCanchas = (fields.data.fields_summary || []).map((f) => ({
-          Cancha: f.field_name,
-          Total: f.total_reservations,
-          Aceptadas: f.status_breakdown?.accepted || 0,
-          Rechazadas: f.status_breakdown?.rejected || 0,
-          Pendientes: f.status_breakdown?.pending || 0,
-          Recaudado: f.total_income,
-          "Duración promedio (min)": f.average_duration_minutes,
-        }));
-
-        const wb = XLSX.utils.book_new();
-        const sheetDiario = XLSX.utils.json_to_sheet(resumenDiario);
-        const sheetCanchas = XLSX.utils.json_to_sheet(resumenCanchas);
-
-        XLSX.utils.book_append_sheet(wb, sheetDiario, "Resumen Diario");
-        XLSX.utils.book_append_sheet(wb, sheetCanchas, "Resumen por Cancha");
-
-        XLSX.writeFile(wb, `Reporte_Reservas_${date}.xlsx`);
+        const filename = `Reporte_Reservas_${period}.xlsx`;
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
       } catch (err) {
         console.error("Error al exportar Excel:", err);
         throw err;

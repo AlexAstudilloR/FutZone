@@ -13,14 +13,14 @@ export const getAppointments = (page = 1, status = null) =>
 export const getAppointmentsByDate = (date) =>
   API.get(`/summary/`, { params: { date } });
 
-export const getAppointmentsSummary = ({ date, fieldId = null }) =>
+export const getAppointmentsSummary = ({ date, start_date, end_date, fieldId = null }) =>
   API.get(`/summary/`, {
     params: {
-      date,
-      ...(fieldId ? { field_id: fieldId } : {}),
+      ...(date && { date }),
+      ...(start_date && end_date ? { start_date, end_date } : {}),
+      ...(fieldId && { field_id: fieldId }),
     },
   });
-
 export const createAppointment = (data) => API.post("/appointments/", data);
 
 export const updateAppointmentStatus = (id, status) =>
@@ -34,12 +34,21 @@ export const getTimeSlots = (date, fieldId, slotMinutes = 60) =>
       slot_minutes: slotMinutes,
     },
   });
+export const getFieldSummary = ({ date = null, start_date = null, end_date = null }) =>
+  API.get(`/summary/by-field/`, {
+    params: {
+      ...(date && { date }),
+      ...(start_date && end_date && { start_date, end_date }),
+    },
+  });
+export const exportReservationReport = ({ date = null, start_date = null, end_date = null }) => {
+  const params = {
+    ...(date && { date }),
+    ...(start_date && end_date && { start_date, end_date }),
+  };
 
-export const getFieldSummaryByDate = (date) =>
-  API.get(`/summary/by-field/`, { params: { date } });
-
-export const exportReservationReport = (params) =>
-  API.get(`/export/reservations/`, {
+  return API.get("/export/reservations/", {
     params,
     responseType: "blob",
   });
+};

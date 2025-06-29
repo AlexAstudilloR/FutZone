@@ -3,13 +3,12 @@
     v-if="isOpen"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
   >
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6">
       <h2 class="text-xl font-semibold mb-4">{{ title }}</h2>
 
       <form @submit.prevent="handleSubmit">
         <template v-if="fields.length">
           <div v-for="field in fields" :key="field.model" class="mt-4">
-            <!-- Campo de archivo -->
             <div v-if="field.type === 'file'">
               <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
               <label
@@ -34,7 +33,6 @@
               </p>
             </div>
 
-            <!-- Select -->
             <div v-else-if="field.type === 'select'">
               <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
               <select
@@ -56,7 +54,6 @@
               </p>
             </div>
 
-            <!-- Checkbox -->
             <BaseCheckbox
               v-else-if="field.type === 'checkbox'"
               v-model="form[field.model]"
@@ -64,7 +61,6 @@
               :error="errorFor(field.model)"
             />
 
-            <!-- Input por defecto -->
             <BaseInput
               v-else
               v-model="form[field.model]"
@@ -80,12 +76,13 @@
           </div>
         </template>
 
-        <!-- Contenido de slot si no hay fields -->
         <template v-else>
-          <slot />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <slot name="form" />
+            <slot name="timeslots" />
+          </div>
         </template>
 
-        <!-- Botones -->
         <div class="mt-6 flex justify-end gap-2">
           <button
             type="button"
@@ -107,9 +104,9 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
-import BaseInput from './BaseInput.vue'
-import BaseCheckbox from './BaseCheckbox.vue'
+import { reactive, watch } from "vue";
+import BaseInput from "./BaseInput.vue";
+import BaseCheckbox from "./BaseCheckbox.vue";
 
 const props = defineProps({
   isOpen: Boolean,
@@ -125,89 +122,76 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-})
+});
 
-const emit = defineEmits(['cancel', 'submit'])
+const emit = defineEmits(["cancel", "submit"]);
 
-const form = reactive({})
-const previews = reactive({})
+const form = reactive({});
+const previews = reactive({});
 
-// Inicializar el formulario con datos iniciales y campos por defecto
 watch(
   () => props.initialData,
   (newVal) => {
     Object.keys(newVal || {}).forEach((key) => {
-      form[key] = newVal[key]
-    })
-
+      form[key] = newVal[key];
+    });
     props.fields.forEach((f) => {
       if (!(f.model in form)) {
-        form[f.model] = f.type === 'checkbox' ? false : ''
+        form[f.model] = f.type === "checkbox" ? false : "";
       }
-    })
+    });
   },
   { immediate: true }
-)
-
-// 🔁 Si se marca "cerrado", limpiar horas
-watch(
-  () => form.cerrado,
-  (val) => {
-    if (val) {
-      form.hora_apertura = null
-      form.hora_cierre = null
-    }
-  }
-)
+);
 
 function clearError(field) {
   if (props.errors[field]) {
-    props.errors[field] = ''
+    props.errors[field] = "";
   }
 }
 
 function handleFileChange(e, model) {
-  const file = e.target.files[0]
-  form[model] = file
+  const file = e.target.files[0];
+  form[model] = file;
 
   if (file) {
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = () => {
-      previews[model] = reader.result
-    }
-    reader.readAsDataURL(file)
+      previews[model] = reader.result;
+    };
+    reader.readAsDataURL(file);
   } else {
-    previews[model] = null
+    previews[model] = null;
   }
 
-  clearError(model)
+  clearError(model);
 }
 
 function imagePreviewUrl(model) {
-  return previews[model] || '/noimage.png'
+  return previews[model] || "/noimage.png";
 }
 
 function errorFor(field) {
-  const err = props.errors?.[field]
-  if (Array.isArray(err)) return err.join(', ')
-  if (typeof err === 'object') return Object.values(err).flat().join(', ')
-  return typeof err === 'string' ? err : null
+  const err = props.errors?.[field];
+  if (Array.isArray(err)) return err.join(", ");
+  if (typeof err === "object") return Object.values(err).flat().join(", ");
+  return typeof err === "string" ? err : null;
 }
 
 function onCancel() {
-  emit('cancel')
+  emit("cancel");
 }
 
 function handleSubmit() {
   if (props.fields.length === 0) {
-    emit('submit')
-    return
+    emit("submit");
+    return;
   }
 
-  const raw = {}
+  const raw = {};
   for (const key in form) {
-    raw[key] = form[key]
+    raw[key] = form[key];
   }
-  emit('submit', raw)
+  emit("submit", raw);
 }
 </script>

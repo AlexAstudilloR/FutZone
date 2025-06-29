@@ -1,19 +1,47 @@
 <script setup>
-import { onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 import { useFieldStore } from "../../stores/fieldStore";
 import SoccerFieldCard from "../../components/SoccerField/FieldCard.vue";
+import GenericModal from "../../components/ui/GenericModal.vue";
+import AppointmentForm from "../../components/appointments/AppointmentForm.vue";
+import TimeSlots from "../../components/ui/TimeSlots.vue";
+import { useAppointmentStore } from "../../stores/appointmentStore";
 
 const fieldStore = useFieldStore();
-const router = useRouter();
+const appointmentStore = useAppointmentStore();
+
+const showReservationModal = ref(false);
+const selectedField = ref(null);
+const selectedSlot = ref({ start: "", end: "" });
+const selectedDate = ref(new Date().toISOString().split("T")[0]);
+
+const appointmentFormRef = ref(null);
+
+function handleReservar(fieldData) {
+  selectedField.value = fieldData;
+  selectedSlot.value = { start: "", end: "" };
+  showReservationModal.value = true;
+}
+
+function handleSlotSelected(slot) {
+  selectedSlot.value = { ...slot };
+}
+
+async function handleReservationSubmit() {
+  if (!appointmentFormRef.value) return;
+
+  const formData = appointmentFormRef.value.getFormData();
+  try {
+    await appointmentStore.createAppointment(formData);
+    showReservationModal.value = false;
+  } catch (err) {
+    console.error("Error al crear la reserva:", err);
+  }
+}
 
 onMounted(() => {
   fieldStore.fetchFields();
 });
-
-function handleReservar(fieldData) {
-  router.push({ name: "Reservar", query: { fieldId: fieldData.id } });
-}
 </script>
 
 <template>
@@ -37,6 +65,34 @@ function handleReservar(fieldData) {
         @reservar="handleReservar"
       />
     </div>
+
+    <GenericModal
+      :isOpen="showReservationModal"
+      title="Reservar cancha"
+      :fields="[]"
+      :submitLabel="'Reservar'"
+      @cancel="showReservationModal = false"
+      @submit="handleReservationSubmit"
+    >
+      <template #form>
+        <AppointmentForm
+          ref="appointmentFormRef"
+          v-if="selectedField"
+          :preselectedField="selectedField"
+          :preselectedSlot="selectedSlot"
+          @close="showReservationModal = false"
+        />
+      </template>
+
+      <template #timeslots>
+        <div v-if="selectedField" class="w-full md:w-full">
+          <TimeSlots
+            :field-id="selectedField.id"
+            :date="selectedDate"
+            @slotSelected="handleSlotSelected"
+          />
+        </div>
+      </template>
+    </GenericModal>
   </div>
 </template>
-
