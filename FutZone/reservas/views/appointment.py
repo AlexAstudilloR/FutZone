@@ -8,10 +8,6 @@ from ..models import Appointment
 from ..serializers import AppointmentSerializer
 
 class AppointmentViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet principal para listar, crear y modificar reservas.
-    Los usuarios normales ven solo sus reservas. Los admins, todas.
-    """
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated, IsAdminOrOwnerWithLimitedEdit]
     authentication_classes = [SupabaseRemoteAuth]

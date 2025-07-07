@@ -6,7 +6,7 @@ import GenericModal from "../../components/ui/GenericModal.vue";
 import AppointmentForm from "../../components/appointments/AppointmentForm.vue";
 import TimeSlots from "../../components/ui/TimeSlots.vue";
 import { useAppointmentStore } from "../../stores/appointmentStore";
-
+import {toast} from "vue3-toastify"
 const fieldStore = useFieldStore();
 const appointmentStore = useAppointmentStore();
 
@@ -34,8 +34,9 @@ async function handleReservationSubmit() {
   try {
     await appointmentStore.createAppointment(formData);
     showReservationModal.value = false;
+    toast.success("Reserva creada con exito, puedes verla en Mi perfil")
   } catch (err) {
-    console.error("Error al crear la reserva:", err);
+    toast.error("Error al crear la reserva:", err);
   }
 }
 

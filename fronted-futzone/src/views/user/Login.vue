@@ -1,23 +1,23 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/authStore'
-import BaseInput from '../../components/ui/BaseInput.vue'
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../../stores/authStore";
+import BaseInput from "../../components/ui/BaseInput.vue";
 
-const email = ref('')
-const password = ref('')
-const auth = useAuthStore()
-const router = useRouter()
+const email = ref("");
+const password = ref("");
+const auth = useAuthStore();
+const router = useRouter();
 
-const errorMessage = computed(() => auth.error)
+const errorMessage = computed(() => auth.error);
 
 const handleLogin = async () => {
-  auth.error = null
-  const success = await auth.login(email.value, password.value)
+  auth.error = null;
+  const success = await auth.login(email.value, password.value);
   if (success) {
-    router.push('/canchas')
+    router.push("/canchas");
   }
-}
+};
 </script>
 
 <template>
@@ -47,6 +47,8 @@ const handleLogin = async () => {
       @input="auth.error = null"
     />
 
+   
+
     <button
       @click="handleLogin"
       class="w-full bg-[#19296D] text-white py-2 rounded hover:bg-blue-900 transition"
@@ -60,8 +62,19 @@ const handleLogin = async () => {
 
     <p class="text-center text-sm mt-4">
       ¿No tienes cuenta?
-      <router-link to="/register" class="text-[#19296D] font-medium hover:underline">
+      <router-link
+        to="/register"
+        class="text-[#19296D] font-medium hover:underline"
+      >
         Regístrate aquí
+      </router-link>
+    </p>
+     <p class="text-center text-sm">
+      <router-link
+        to="/recover-password"
+        class="text-[#19296D] hover:underline"
+      >
+        ¿Olvidaste tu contraseña?
       </router-link>
     </p>
   </div>

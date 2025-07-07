@@ -5,7 +5,7 @@
       Bienvenido al panel administrativo de FutZone
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <DashboardCard
         title="Horarios"
         icon="clock"
@@ -22,12 +22,6 @@
         title="Canchas"
         icon="futbol"
         iconColor="text-green-500"
-        to="/admin/fields"
-      />
-      <DashboardCard
-        title="Estadísticas"
-        icon="chart-line"
-        iconColor="text-orange-500"
         to="/admin/fields"
       />
     </div>
