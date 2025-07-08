@@ -23,33 +23,66 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useAuthStore } from '../../stores/authStore'
-import BaseInput from '../../components/ui/BaseInput.vue'
+import { ref, computed } from "vue";
+import { supabase } from "../../lib/supabase";
+import BaseInput from "../../components/ui/BaseInput.vue";
 
-const email = ref('')
-const message = ref('')
-const isError = ref(false)
-const auth = useAuthStore()
+const email = ref("");
+const message = ref("");
+const isError = ref(false);
 
 const clearMessage = () => {
-  message.value = ''
-  isError.value = false
-}
+  message.value = "";
+  isError.value = false;
+};
 
 const handleRecovery = async () => {
-  clearMessage()
-  const ok = await auth.sendRecoveryEmail(email.value)
-  if (ok) {
-    message.value = 'Revisa tu correo para restablecer tu contraseña.'
-    isError.value = false
-  } else {
-    message.value = auth.error || 'Error al enviar el correo.'
-    isError.value = true
+  clearMessage();
+
+  if (!email.value || !email.value.includes("@")) {
+    message.value = "Por favor, ingresa un correo válido.";
+    isError.value = true;
+    return;
   }
-}
+
+  // Llamar a la función RPC que revisa si el correo está registrado
+  const { data: exists, error } = await supabase.rpc("email_exists", {
+    user_email: email.value,
+  });
+
+  if (error) {
+    message.value = "Error al verificar el correo.";
+    isError.value = true;
+    return;
+  }
+
+  if (!exists) {
+    message.value = "El correo no está registrado.";
+    isError.value = true;
+    return;
+  }
+
+  // Si existe, enviar el enlace de recuperación
+  const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(
+    email.value,
+    {
+      redirectTo: `${import.meta.env.VITE_APP_URL}/reset-password`,
+    }
+  );
+
+  if (recoveryError) {
+    message.value = "Hubo un error al enviar el correo.";
+    isError.value = true;
+    return;
+  }
+
+  message.value = "Revisa tu correo para restablecer tu contraseña.";
+  isError.value = false;
+};
 
 const messageClass = computed(() =>
-  isError.value ? 'text-red-500 text-sm text-center' : 'text-green-500 text-sm text-center'
-)
+  isError.value
+    ? "text-red-500 text-sm text-center"
+    : "text-green-500 text-sm text-center"
+);
 </script>

@@ -33,6 +33,7 @@ import {
   faCompass,
   faCalendarAlt,
   faFileExcel,
+  faXmarkCircle,
   
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -68,7 +69,9 @@ library.add(
   faUsers,
   faCompass,
   faCalendarAlt,
-  faFileExcel
+  faFileExcel,
+  faCircleCheck,
+  faXmarkCircle
 );
 
 export default FontAwesomeIcon;

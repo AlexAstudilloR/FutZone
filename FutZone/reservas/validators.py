@@ -8,23 +8,34 @@ class AppointmentValidator:
     
     @staticmethod
     def validate(instance):
-
-        if instance.date < date.today():
-            raise ValidationError("No se puede reservar en una fecha pasada.")
+        # ❌ Validar si el usuario intenta cancelar estando en estado no permitido
+        if instance.status == 'cancelled' and instance._original_status in ['accepted', 'rejected']:
+            raise ValidationError("No se puede cancelar una reserva que ya fue aceptada o rechazada.")
         
+        # ✅ Si la fecha ya pasó y sigue como 'pending', se marca automáticamente como 'rejected'
+        if instance.status == 'pending' and instance.date < date.today():
+            instance.status = 'rejected'
+
+        # ⛔ Validar que no sea una fecha pasada (si está intentando reservar o modificar)
+        if instance.date < date.today() and instance.status != 'rejected':
+            raise ValidationError("No se puede reservar en una fecha pasada.")
+
+        # ⛔ Validar campos obligatorios
         required = ['date', 'time_start', 'time_end', 'field']
         if any(getattr(instance, f, None) is None for f in required):
             return
-        
+
         if instance.time_start >= instance.time_end:
             raise ValidationError("La hora de inicio debe ser menor a la hora de fin.")
         
+        # ⏱ Duración mínima: 30 minutos
         start_dt = datetime.combine(instance.date, instance.time_start)
         end_dt = datetime.combine(instance.date, instance.time_end)
         duration = (end_dt - start_dt).total_seconds() / 60
         if duration < 30:
             raise ValidationError("La duración mínima de una reserva debe ser de 30 minutos.")
         
+        # 📅 Validar contra excepciones y horario semanal
         weekday = instance.date.weekday()  
         dia_nombre = AppointmentValidator.dias_es[weekday]
         
@@ -47,6 +58,7 @@ class AppointmentValidator:
         if not (ws.hora_apertura <= instance.time_start < instance.time_end <= ws.hora_cierre):
             raise ValidationError("La reserva está fuera del horario disponible semanal.")
         
+        # 🔁 Validar que no se solape con otras reservas
         overlap = instance.__class__.objects.filter(
             field=instance.field,
             date=instance.date

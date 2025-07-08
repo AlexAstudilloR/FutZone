@@ -9,6 +9,7 @@ class Appointment(models.Model):
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
+        ('cancelled', 'Cancelled'),
     ]
 
     user = models.ForeignKey(ProfileModel, on_delete=models.CASCADE, related_name='appointments')   
