@@ -6,17 +6,16 @@ from .common import (
 from profiles.permissions import IsAdminOrReadOnly
 from ..models import Appointment
 class TimeSlotAvailabilityAPIView(APIView):
-
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
     def get(self, request):
-        date_str  = request.query_params.get('date')
-        field_id  = request.query_params.get('field_id')
+        date_str = request.query_params.get('date')
+        field_id = request.query_params.get('field_id')
         slot_mins = int(request.query_params.get('slot_minutes', 60))
 
         try:
             fecha = datetime.strptime(date_str, "%Y-%m-%d").date()
-        except:
+        except Exception:
             return Response({"error": "date YYYY-MM-DD obligatorio"}, status=400)
 
         apertura, cierre = get_open_close(field_id, fecha)
@@ -27,7 +26,11 @@ class TimeSlotAvailabilityAPIView(APIView):
                 "average_duration_minutes": 0
             })
 
-        reservas = Appointment.objects.filter(date=fecha, field_id=field_id)
+        reservas = Appointment.objects.filter(
+            date=fecha,
+            field_id=field_id,
+            status__in=['pending', 'accepted']  # solo reservas activas
+        )
 
         occupied = [
             {"start": r.time_start.strftime("%H:%M"), "end": r.time_end.strftime("%H:%M")}

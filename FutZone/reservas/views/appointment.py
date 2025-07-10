@@ -1,5 +1,6 @@
 from .common import viewsets, IsAuthenticated, SupabaseRemoteAuth
 from .common import Response, APIView,status
+from django.core.exceptions import ValidationError
 
 from profiles.models import ProfileModel
 from profiles.permissions import IsAdminOrOwnerWithLimitedEdit, IsAdminOrReadOnly
@@ -29,8 +30,28 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         profile = ProfileModel.objects.get(id=self.request.user.id) 
         serializer.save(user=profile)
+    def perform_update(self, serializer):
+        profile = ProfileModel.objects.get(id=self.request.user.id)
+        instance = self.get_object()
+        new_status = self.request.data.get('status', instance.status)
 
+        if profile.is_admin:
+        # Admin puede cambiar cualquier estado sin restricciones
+            serializer.save()
+            return
 
+    # No admin (usuario normal)
+        if instance.user != profile:
+            raise PermissionDenied("No puedes modificar esta reserva.")
+
+    # Solo se permite cancelar la reserva (status == 'cancelled')
+        if new_status != 'cancelled':
+            raise ValidationError("Solo puedes cancelar tu reserva.")
+
+        # Solo puede cancelar reservas pendientes o aceptadas
+        if instance.status not in ['pending', 'accepted']:
+         raise ValidationError("Solo puedes cancelar reservas pendientes o aceptadas.")
+        serializer.save()
 class ReservasPorFechaAPIView(APIView):
     """
     Devuelve todas las reservas creadas en una fecha específica.

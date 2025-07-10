@@ -64,6 +64,7 @@
               :key="reserva.id"
               :appointment="reserva"
               :is-admin="authStore.profile?.is_admin"
+              @cancel="() => cancelAppointment(reserva.id)"
             />
           </div>
         </div>
@@ -89,6 +90,8 @@ import NoData from "../../components/ui/NoData.vue";
 import * as authService from "../../services/authService";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useAuthStore } from "../../stores/authStore";
+import Swal from "sweetalert2";
+
 const authStore = useAuthStore();
 const profile = ref({});
 const appointmentStore = useAppointmentStore();
@@ -100,6 +103,7 @@ const statusOptions = [
   { value: "pending", label: "Pendiente" },
   { value: "accepted", label: "Aceptada" },
   { value: "rejected", label: "Rechazada" },
+  { value: "cancelled", label: "Cancelada" },
 ];
 
 const fetchProfile = async () => {
@@ -112,6 +116,50 @@ const fetchAppointments = () => {
     currentPage.value,
     selectedStatus.value || null
   );
+};
+const cancelAppointment = async (id) => {
+  const { isConfirmed } = await Swal.fire({
+    title: "¿Cancelar reserva?",
+    text: "Esta acción no se puede deshacer.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cancelar",
+    cancelButtonText: "No",
+    buttonsStyling: false,
+    customClass: {
+      popup: "rounded-lg p-6",
+      confirmButton:
+        "border border-red-600 text-red-600 bg-white px-4 py-2 rounded hover:bg-red-600 hover:text-white transition-colors duration-200 mr-2",
+      cancelButton:
+        "border border-blue-600 text-blue-600 bg-white px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors duration-200",
+    },
+  });
+
+  if (!isConfirmed) return;
+
+  try {
+    await appointmentStore.updateStatus(id, "cancelled");
+    fetchAppointments();
+
+    await Swal.fire({
+      title: "Reserva cancelada",
+      icon: "success",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    console.error("Error al cancelar:", error);
+    await Swal.fire({
+      title: "Error",
+      text: "No se pudo cancelar la reserva.",
+      icon: "error",
+      confirmButtonText: "OK",
+      customClass: {
+        confirmButton:
+          "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition",
+      },
+    });
+  }
 };
 
 const handlePageChange = (page) => {

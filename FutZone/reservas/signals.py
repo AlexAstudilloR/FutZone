@@ -87,3 +87,21 @@ def notificar_reserva(sender, instance, created, **kwargs):
             print("Admin notificado. SID:", sid_admin)
         except Exception as e:
             print("Error enviando rechazo:", e)
+    elif estado_anterior != 'cancelled' and instance.status == 'cancelled':
+        mensaje_usuario = (
+            "Tu reserva ha sido cancelada exitosamente.\n"
+            "Si fue un error, puedes volver a reservar desde la aplicación."
+        )
+        mensaje_admin = (
+            f"⚠️ RESERVA CANCELADA por el cliente:\n"
+            f"Cliente: {instance.user.full_name}\n"
+            f"Fecha: {instance.date} | {instance.time_start}-{instance.time_end}\n"
+            f"Cancha: {instance.field.name}"
+        )
+        try:
+            sid_user = send_whatsapp_message(numero, mensaje_usuario)
+            sid_admin = send_whatsapp_message(ADMIN_NUMBER, mensaje_admin)
+            print("Cancelación enviada. SID usuario:", sid_user)
+            print("Admin notificado de cancelación. SID:", sid_admin)
+        except Exception as e:
+            print("Error enviando cancelación:", e)

@@ -1,14 +1,54 @@
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps({
+  appointment: Object,
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const totalHours = computed(() => {
+  const start = parseInt(props.appointment.time_start.split(":")[0]);
+  const end = parseInt(props.appointment.time_end.split(":")[0]);
+  return end - start;
+});
+
+const estadoTexto = computed(() => {
+  if (props.appointment.status === "accepted") return "Aceptada";
+  if (props.appointment.status === "rejected") return "Rechazada";
+  if (props.appointment.status === "cancelled") return "Cancelada";
+  return "Pendiente";
+});
+
+const puedeCancelar = computed(() => {
+  if (props.appointment.status !== "pending") {
+    // Solo se puede cancelar si está pendiente
+    return false;
+  }
+  if (props.isAdmin) {
+    return false; // admin no puede cancelar
+  }
+  const now = new Date();
+  const [h, m] = props.appointment.time_start.split(":").map(Number);
+  const startDate = new Date(`${props.appointment.date}T${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`);
+  const diff = (startDate - now) / (1000 * 60);
+  return diff >= 60; // puede cancelar solo si falta más de 1 hora
+});
+</script>
+
 <template>
   <div
     class="border rounded-lg p-4 shadow-sm mb-4 flex justify-between items-center transition"
     :class="{
       'bg-white':
         appointment.status === 'pending' || appointment.status === 'accepted',
-      'bg-gray-100 opacity-80': appointment.status === 'rejected',
+      'bg-gray-100 opacity-80':
+        appointment.status === 'rejected' || appointment.status === 'cancelled',
     }"
   >
     <div class="flex flex-col md:flex-row justify-between w-full gap-4">
-
       <div class="grid grid-cols-2 gap-y-1 text-sm flex-1">
         <p><strong>Cliente:</strong> {{ appointment.user_full_name }}</p>
         <p><strong>Fecha:</strong> {{ appointment.date }}</p>
@@ -22,7 +62,6 @@
         <p><strong>Total:</strong> ${{ appointment.valor_pagar }}</p>
       </div>
 
-      <!-- Acciones o estado -->
       <div class="flex flex-col justify-center items-end min-w-[120px]">
         <div
           v-if="props.isAdmin && appointment.status === 'pending'"
@@ -42,12 +81,26 @@
           </button>
         </div>
 
+        <button
+          v-else-if="
+            !props.isAdmin &&
+            puedeCancelar &&
+            (appointment.status === 'pending' ||
+              appointment.status === 'accepted')
+          "
+          @click="$emit('cancel')"
+          class="border border-yellow-500 text-yellow-600 px-3 py-1.5 rounded hover:bg-yellow-100 text-sm"
+        >
+          Cancelar
+        </button>
+
         <p
           v-else
           class="text-sm font-semibold"
           :class="{
             'text-green-600': appointment.status === 'accepted',
             'text-red-500': appointment.status === 'rejected',
+            'text-yellow-500': appointment.status === 'cancelled',
           }"
         >
           {{ estadoTexto }}
@@ -56,26 +109,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { computed } from "vue";
-
-const props = defineProps({
-  appointment: Object,
-  isAdmin: {
-    type: Boolean,
-    default: false,
-  },
-});
-const totalHours = computed(() => {
-  const start = parseInt(props.appointment.time_start.split(":")[0]);
-  const end = parseInt(props.appointment.time_end.split(":")[0]);
-  return end - start;
-});
-
-const estadoTexto = computed(() => {
-  if (props.appointment.status === "accepted") return "Aceptada";
-  if (props.appointment.status === "rejected") return "Rechazada";
-  return "Pendiente";
-});
-</script>

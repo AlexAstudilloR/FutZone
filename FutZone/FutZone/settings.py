@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
+from celery.schedules import crontab
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,9 +18,20 @@ TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
 PEIGO_QR_URL = "https://upload.wikimedia.org/wikipedia/commons/5/5e/QR_Code_example.png"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 ALLOWED_HOSTS = []
-
+CELERY_BEAT_SCHEDULE = {
+    'rechazar_reservas_vencidas_diario': {
+        'task': 'reservas.tasks.rechazar_reservas_vencidas_diario',
+        'schedule': crontab(hour=23,minute=0),  # Corre todos los días a medianoche
+    },
+     'recordatorio-admin-cada-2-horas': {
+        'task': 'reservas.tasks.recordatorio_reservas_pendientes',
+        'schedule': crontab(minute=0, hour='*/2'),  # Cada 2 horas
+    },
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',

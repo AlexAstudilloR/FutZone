@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, watch } from "vue";
+import { ref, computed, watchEffect, watch , onMounted} from "vue";
 import AppointmentCard from "../../components/ui/AppointmentCard.vue";
 import Pagination from "../../components/ui/Pagination.vue";
 import LinkButton from "../../components/ui/LinkButton.vue";
@@ -111,7 +111,9 @@ const sortAppointments = () => {
 };
 
 const sortedAppointments = computed(() => store.appointments);
-
+onMounted(() => {
+  loadAppointments();
+});
 watch(selectedStatus, () => {
   currentPage.value = 1;
   loadAppointments();
