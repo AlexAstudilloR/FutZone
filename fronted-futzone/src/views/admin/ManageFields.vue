@@ -102,7 +102,7 @@ import Pagination from "../../components/ui/Pagination.vue";
 import GenericModal from "../../components/ui/GenericModal.vue";
 import DataTable from "../../components/ui/DataTable.vue";
 import BaseButton from "../../components/ui/BaseButton.vue";
-
+import Swal from "sweetalert2";
 const store = useFieldStore();
 const currentPage = ref(1);
 const showCreate = ref(false);
@@ -187,9 +187,46 @@ function openEdit(field) {
   showEdit.value = true;
 }
 
-function confirmDelete(id) {
-  if (confirm("¿Seguro que quieres eliminar esta cancha?")) {
-    store.deleteField(id);
+async function confirmDelete(id) {
+  const result = await Swal.fire({
+    title: "¿Estás seguro?",
+    text: "La cancha será eliminada permanentemente.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    customClass: {
+      confirmButton:
+        "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition",
+      cancelButton:
+        "bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition",
+    },
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await store.deleteField(id);
+    await loadPage(currentPage.value);
+
+    await Swal.fire({
+      title: "Cancha eliminada",
+      icon: "success",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    console.error("Error al eliminar cancha:", error);
+    await Swal.fire({
+      title: "Error",
+      text: "No se pudo eliminar la cancha.",
+      icon: "error",
+      confirmButtonText: "OK",
+      customClass: {
+        confirmButton:
+          "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition",
+      },
+    });
   }
 }
 

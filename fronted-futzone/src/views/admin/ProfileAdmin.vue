@@ -1,17 +1,33 @@
 <template>
   <div class="p-6 space-y-8">
     <!-- Perfil del admin -->
-    <section class="bg-white shadow rounded-lg p-6 flex items-center gap-6">
-      <div class="w-24 h-24 rounded-full overflow-hidden">
-        <img
-          src="/profile.jpeg"
-          alt="Foto de perfil"
-          class="w-full h-full object-cover rounded-full"
-        />
+    <section
+      class="bg-white shadow rounded-lg p-6 flex items-center gap-6 justify-between"
+    >
+      <div class="flex items-center gap-6">
+        <div class="w-24 h-24 rounded-full overflow-hidden">
+          <img
+            src="/profile.jpeg"
+            alt="Foto de perfil"
+            class="w-full h-full object-cover rounded-full"
+          />
+        </div>
+        <div class="flex flex-col">
+          <h2 class="text-xl font-bold">{{ profile.full_name }}</h2>
+          <p class="text-gray-600"><b>+593</b> {{ profile.cell_phone }}</p>
+        </div>
       </div>
-      <div class="flex flex-col">
-        <h2 class="text-xl font-bold">{{ profile.full_name }}</h2>
-        <p class="text-gray-600"><b>+593</b> {{ profile.cell_phone }}</p>
+
+      <div class="flex gap-2">
+        <!-- Ver QR -->
+        <BaseButton variant="secondary" @click="showQrModal = true">
+          Ver QR de pago
+        </BaseButton>
+
+        <!-- Subir QR -->
+        <BaseButton variant="primary" @click="uploadQrModal = true">
+          Subir QR de pago
+        </BaseButton>
       </div>
     </section>
 
@@ -48,11 +64,7 @@
           </div>
           <span
             class="text-sm px-2 py-1 rounded font-medium"
-            :class="
-              user.is_admin
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-700'
-            "
+            :class="user.is_admin ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'"
           >
             {{ user.is_admin ? "Admin" : "Usuario" }}
           </span>
@@ -60,6 +72,7 @@
       </div>
     </section>
 
+    <!-- Modal para crear usuario -->
     <GenericModal
       :isOpen="isModalOpen"
       title="Nuevo Usuario"
@@ -70,19 +83,31 @@
       @submit="handleCreate"
       @cancel="isModalOpen = false"
     />
+
+    <!-- Modal para subir QR -->
+    <PaymentModal :isOpen="uploadQrModal" @close="handleUploadQrClose" />
+
+    <!-- Modal para ver QR -->
+    <PaymentQR :show="showQrModal" @close="showQrModal = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useProfileStore } from "../../stores/profileStore";
-import { registerUser, getMyProfile } from "../../services/authService";
+import { getMyProfile } from "../../services/authService";
+
 import BaseButton from "../../components/ui/BaseButton.vue";
 import GenericModal from "../../components/ui/GenericModal.vue";
+import PaymentModal from "../../components/admin/PaymentModal.vue"; // 👈 ya estaba
+import PaymentQR from "../../components/admin/PaymentQR.vue"; // 👈 nuevo
 
 const profile = ref({});
 const isModalOpen = ref(false);
 const formErrors = ref({});
+const uploadQrModal = ref(false); // para PaymentModal (subir)
+const showQrModal = ref(false);   // para PaymentQR (ver)
+
 const profileStore = useProfileStore();
 
 const modalFields = [
@@ -126,21 +151,6 @@ const modalFields = [
   },
 ];
 
-const openModal = () => {
-  isModalOpen.value = true;
-  formErrors.value = {};
-};
-
-const handleCreate = async (data) => {
-  formErrors.value = {};
-  try {
-    await profileStore.createUserAndProfile(data);
-    isModalOpen.value = false;
-  } catch (err) {
-    formErrors.value = err;
-  }
-};
-
 const fetchProfile = async () => {
   const { data } = await getMyProfile();
   profile.value = data;
@@ -156,6 +166,26 @@ const safeProfiles = computed(() => {
   }
   return [];
 });
+
+const openModal = () => {
+  isModalOpen.value = true;
+  formErrors.value = {};
+};
+
+const handleCreate = async (data) => {
+  formErrors.value = {};
+  try {
+    await profileStore.createUserAndProfile(data);
+    isModalOpen.value = false;
+  } catch (err) {
+    formErrors.value = err;
+  }
+};
+
+const handleUploadQrClose = async () => {
+  uploadQrModal.value = false;
+  await fetchProfile(); // actualiza datos si se sube un nuevo QR
+};
 
 onMounted(async () => {
   await fetchProfile();

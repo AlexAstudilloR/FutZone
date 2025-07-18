@@ -83,6 +83,7 @@ defineExpose({
         type="date"
         :min="minDate"
         required
+        @input="$emit('update-date', form.date)"
       />
     </div>
 

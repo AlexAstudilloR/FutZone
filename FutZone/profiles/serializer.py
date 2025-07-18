@@ -14,3 +14,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             fields['is_admin'].read_only = True
 
         return fields
+
+
+class PaymentMethodQRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfileModel
+        fields = ['payment_qr']

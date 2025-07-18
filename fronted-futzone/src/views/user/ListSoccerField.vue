@@ -82,6 +82,7 @@ onMounted(() => {
           :preselectedField="selectedField"
           :preselectedSlot="selectedSlot"
           @close="showReservationModal = false"
+          @update-date="selectedDate = $event"
         />
       </template>
 

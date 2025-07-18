@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { supabase } from "../lib/supabase";
-import { registerUser, getMyProfile } from "../services/authService";
+import {
+  registerUser,
+  getMyProfile,
+  addPaymentMethod,
+  getLastPaymentMethod,
+} from "../services/authService";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -43,11 +48,15 @@ export const useAuthStore = defineStore("auth", {
       this.error = null;
       this.isReady = false;
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (error) {
-          this.error = error.message === "Invalid login credentials"
-            ? "Correo o contraseña incorrectos"
-            : "Error al iniciar sesión";
+          this.error =
+            error.message === "Invalid login credentials"
+              ? "Correo o contraseña incorrectos"
+              : "Error al iniciar sesión";
           return false;
         }
         this.user = data.user;
@@ -94,7 +103,7 @@ export const useAuthStore = defineStore("auth", {
     async sendRecoveryEmail(email) {
       this.error = null;
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${import.meta.env.VITE_APP_URL}/reset-password`
+        redirectTo: `${import.meta.env.VITE_APP_URL}/reset-password`,
       });
       if (error) {
         this.error = error.message;
@@ -102,14 +111,64 @@ export const useAuthStore = defineStore("auth", {
       }
       return true;
     },
-    async updatePassword(newPassword){
-      this.error = null ;
-      const {error} = await supabase.auth.updateUser({password: newPassword})
-      if (error){
+
+    async updatePassword(newPassword) {
+      this.error = null;
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) {
         this.error = error.message;
         return false;
       }
-        return true;
-    }
+      return true;
+    },
+
+    // Aquí la función que faltaba dentro de actions
+    async uploadPaymentQR(formData) {
+      this.error = null;
+      try {
+        const response = await addPaymentMethod(formData);
+        // Actualizamos el perfil con la info más reciente
+        const profileRes = await getMyProfile();
+        this.profile = profileRes.data;
+        return { success: true };
+      } catch (error) {
+        console.error("Error al subir código QR:", error);
+        this.error = error.response?.data || {
+          general: "Error desconocido al subir el código QR",
+        };
+        return { success: false, error: this.error };
+      }
+    },
+    async getPaymentMethod() {
+      this.error = null;
+      try {
+        const response = await getLastPaymentMethod();
+        if (response && response.data) {
+          const payment_qr = response.data.payment_qr;
+
+          const fullUrl = payment_qr?.startsWith("http")
+            ? payment_qr
+            : `${import.meta.env.VITE_BACKEND_URL}${payment_qr}`;
+
+          this.profile = {
+            ...this.profile,
+            payment_qr: fullUrl,
+          };
+
+          return {
+            success: true,
+            data: { ...response.data, payment_qr: fullUrl },
+          };
+        } else {
+          return { success: false, error: "No se encontró método de pago" };
+        }
+      } catch (error) {
+        this.error =
+          error.response?.data || "Error al obtener el método de pago";
+        return { success: false, error: this.error };
+      }
+    },
   },
 });

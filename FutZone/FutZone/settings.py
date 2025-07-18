@@ -11,7 +11,7 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-%n!)s(pm^e-udpj9&2ti*1_!)8gtap2dp8&!th36@nefc6ukub'
 DEBUG = True
 
-#Información que se supone que debe de ser confidencial 
+
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -21,15 +21,19 @@ PEIGO_QR_URL = "https://upload.wikimedia.org/wikipedia/commons/5/5e/QR_Code_exam
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".ngrok-free.app",  # el punto inicial permite subdominios
+]
 CELERY_BEAT_SCHEDULE = {
     'rechazar_reservas_vencidas_diario': {
         'task': 'reservas.tasks.rechazar_reservas_vencidas_diario',
-        'schedule': crontab(hour=23,minute=0),  # Corre todos los días a medianoche
+        'schedule': crontab(hour=23,minute=0), 
     },
      'recordatorio-admin-cada-2-horas': {
         'task': 'reservas.tasks.recordatorio_reservas_pendientes',
-        'schedule': crontab(minute=0, hour='*/2'),  # Cada 2 horas
+        'schedule': crontab(minute=0, hour='*/2'),
     },
 }
 
@@ -40,12 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     #Nuestras apps 
+
      'reservas.apps.ReservasConfig',
      'horario',
      'cancha',
      'profiles',
-     #Librerias instaladas
+
      'rest_framework',
      'corsheaders'
 ]

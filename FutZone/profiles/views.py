@@ -10,8 +10,8 @@ import os
 import dotenv
 import re
 from .models import ProfileModel
-from .serializer import ProfileSerializer
-
+from .serializer import ProfileSerializer,PaymentMethodQRSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
 dotenv.load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -185,3 +185,53 @@ class MyProfileView(APIView):
             "cell_phone": profile.cell_phone,
             "is_admin": profile.is_admin,
         })
+
+
+class AdminPaymentQRView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        profile = request.user
+        if not profile.is_admin:
+            raise PermissionDenied("Solo los administradores pueden acceder a esta información.")
+
+        serializer = PaymentMethodQRSerializer(profile)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        profile = request.user
+        if not profile.is_admin:
+            raise PermissionDenied("Solo los administradores pueden modificar el método de pago.")
+
+        serializer = PaymentMethodQRSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Método de pago actualizado correctamente.",
+                "payment_qr": serializer.data["payment_qr"]
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LastPaymentQRView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = request.user
+        if not profile.is_admin:
+            raise PermissionDenied("Solo los administradores pueden acceder a esta información.")
+
+        last_profile_with_qr = (
+            ProfileModel.objects
+            .filter(is_admin=True)
+            .exclude(payment_qr__isnull=True)
+            .exclude(payment_qr__exact='')
+            .order_by('-updated_at')  
+            .first()
+        )
+
+        if not last_profile_with_qr:
+            return Response({"message": "No hay métodos de pago registrados."}, status=404)
+
+        serializer = PaymentMethodQRSerializer(last_profile_with_qr)
+        return Response(serializer.data)

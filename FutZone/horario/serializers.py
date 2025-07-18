@@ -46,6 +46,8 @@ class WeeklyScheduleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
         return attrs
 
+from rest_framework import serializers
+from .models import DateException, SoccerField
 
 class DateExceptionSerializer(serializers.ModelSerializer):
     cancha = serializers.CharField(source='cancha.name', read_only=True)
@@ -74,6 +76,15 @@ class DateExceptionSerializer(serializers.ModelSerializer):
     def get_cerrado_display(self, obj):
         return 'Sí' if obj.cerrado else 'No'
 
+    def to_internal_value(self, data):
+        # Si está cerrado, asignar horas por defecto si están vacías o None
+        if data.get('cerrado'):
+            if data.get('hora_apertura') in ['', None]:
+                data['hora_apertura'] = "00:00"
+            if data.get('hora_cierre') in ['', None]:
+                data['hora_cierre'] = "23:59"
+        return super().to_internal_value(data)
+
     def validate(self, attrs):
         cancha = attrs.get('cancha') or getattr(self.instance, 'cancha', None)
         fecha = attrs.get('fecha') or getattr(self.instance, 'fecha', None)
@@ -85,19 +96,17 @@ class DateExceptionSerializer(serializers.ModelSerializer):
         errors = {}
 
         if cerrado:
-            # Si está cerrado, hora apertura y cierre se anulan (todo el día)
-            attrs['hora_apertura'] = None
-            attrs['hora_cierre'] = None
-
+            # Si está cerrado, no hace falta hora_apertura ni hora_cierre, pero en to_internal_value ya se ponen valores por defecto
             if not motivo:
                 errors['motivo'] = ['Debe indicar un motivo si la cancha está cerrada ese día.']
         else:
             if not ap or not ci:
-                errors['hora_apertura'] = ['Debe especificar apertura si no está cerrado.']
-                errors['hora_cierre'] = ['Debe especificar cierre si no está cerrado.']
+                errors['hora_apertura'] = ['Debe especificar hora de apertura si no está cerrado.']
+                errors['hora_cierre'] = ['Debe especificar hora de cierre si no está cerrado.']
             elif ap >= ci:
                 errors['hora_apertura'] = ['La hora de apertura debe ser anterior a la de cierre.']
 
+        # Verificar traslapes con otras excepciones para la misma cancha y fecha
         qs = DateException.objects.filter(cancha=cancha, fecha=fecha)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)

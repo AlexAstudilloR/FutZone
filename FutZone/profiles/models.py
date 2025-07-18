@@ -9,6 +9,7 @@ class ProfileModel(models.Model):
      full_name = models.TextField(null=True, blank=True)
      cell_phone = models.TextField(null=True, blank=True)
      status = models.BooleanField(default=True, null=True)
+     payment_qr= models.ImageField(upload_to='payment_method/',blank= True, null= True)
      is_admin= models.BooleanField(default=False,null=True)
      created_at = models.DateTimeField(auto_now_add=True)
      updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)

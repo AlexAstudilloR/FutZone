@@ -34,7 +34,7 @@ class DateException(models.Model):
     fecha = models.DateField()
     hora_apertura = models.TimeField(null=True, blank=True)
     hora_cierre = models.TimeField(null=True, blank=True)
-    cerrado = models.BooleanField(default=True)
+    cerrado = models.BooleanField(default=False)
     motivo = models.CharField(max_length=200, blank=True)
 
     class Meta:

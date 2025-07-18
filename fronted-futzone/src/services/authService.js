@@ -10,3 +10,5 @@ export const createProfile = (data) => API.post("/auth/profiles/", data);
 export const updateProfile = (id, data) =>
   API.put(`/auth/profiles/${id}/`, data);
 export const deleteProfile = (id) => API.delete(`/auth/profiles/${id}/`);
+export const addPaymentMethod = (data) => API.patch('/auth/payment-method/',data)
+export const getLastPaymentMethod = () => API.get('auth/payment-method/last/')
